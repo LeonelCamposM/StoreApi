@@ -12,7 +12,7 @@ public class ProductRepository : IProductRepository
 
     public async Task<IEnumerable<Product>> GetAllAsync()
     {
-        Query query = _firestoreDb.Collection("Products");
+        Query query = _firestoreDb.Collection("ProductsTest");
         QuerySnapshot snapshot = await query.GetSnapshotAsync();
         List<Product> products = new List<Product>();
         foreach (DocumentSnapshot documentSnapshot in snapshot.Documents)
