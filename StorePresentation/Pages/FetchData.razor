@@ -1,0 +1,74 @@
+﻿@page "/fetchdata"
+@inject HttpClient Http
+@using StorePresentation.Shared
+
+<PageTitle>Productos</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Productos de Juan</MudText>
+<MudText Class="mb-8">Productos disponibles</MudText>
+@if (products == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    <MudTable Items="@products">
+        <HeaderContent>
+            <MudTh>Nombre</MudTh>
+            <MudTh>Precio</MudTh>
+            <MudTh>Existencias</MudTh>
+            <MudTh>Imagen</MudTh>
+            <MudTh>Descripción</MudTh>
+            <MudTh>Categoría</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Nombre">@context.Name</MudTd>
+            <MudTd DataLabel="Precio">@context.Price</MudTd>
+            <MudTd DataLabel="Existencias">@context.Stock</MudTd>
+            <MudTd DataLabel="Imagen">@context.Image</MudTd>
+            <MudTd DataLabel="Descripción">@context.Description</MudTd>
+            <MudTd DataLabel="Categoría">@context.Category</MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+
+@code {
+    private List<Product> products = new List<Product>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await Http.GetFromJsonAsync<List<Product>>("https://localhost:7143/Products");
+    }
+
+
+    public class Product
+    {
+
+        public string Name { get; set; }
+
+        public double Price { get; set; }
+
+
+        public double Stock { get; set; }
+
+
+        public string Image { get; set; }
+
+        public string Description { get; set; }
+
+
+        public string Category { get; set; }
+
+
+        public Product(string name, double price, double stock, string image, string description, string category)
+        {
+            Name = name;
+            Price = price;
+            Stock = stock;
+            Image = image;
+            Description = description;
+            Category = category;
+        }
+    }
+}

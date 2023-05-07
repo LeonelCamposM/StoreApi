@@ -22,7 +22,7 @@ public class Product
     public string Category { get; set; }
 
 
-    public Product(string name, int price, int stock, string image, string description, string category)
+    public Product(string name, double price, double stock, string image, string description, string category)
     {
         Name = name;
         Price = price;

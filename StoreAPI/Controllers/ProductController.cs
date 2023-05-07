@@ -1,4 +1,3 @@
-// En tu capa de presentación (controladores de API)
 using Microsoft.AspNetCore.Mvc;
 namespace StoreAPI.Controllers
 
