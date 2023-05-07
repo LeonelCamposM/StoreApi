@@ -361,4 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/StoreAPI/Key.json
+
+src/StoreAPI/Key.json
