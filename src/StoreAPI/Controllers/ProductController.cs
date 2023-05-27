@@ -24,6 +24,8 @@ namespace StoreAPI.Controllers
             var eventId = new EventId(0001, "RequestedProducts");
             IEnumerable < Product > products =  await _productService.GetAllAsync();
             _logger.LogInformation(eventId, "products requested  at: {time} :  ", DateTimeOffset.UtcNow);
+            _logger.LogWarning("This is a warning message.");
+            _logger.LogError("This is a error message.");
             return  products;
         }
     }
