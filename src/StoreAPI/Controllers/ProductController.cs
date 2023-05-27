@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using static Google.Cloud.Firestore.V1.StructuredQuery.Types;
+
 namespace StoreAPI.Controllers
 
 {
@@ -7,16 +10,21 @@ namespace StoreAPI.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
+        ILogger<ProductsController> _logger;
 
-        public ProductsController(IProductService productService)
+        public ProductsController(IProductService productService, ILogger<ProductsController> logger)
         {
             _productService = productService;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<IEnumerable<Product>> Get()
         {
-            return await _productService.GetAllAsync();
+            var eventId = new EventId(0001, "RequestedProducts");
+            IEnumerable < Product > products =  await _productService.GetAllAsync();
+            _logger.LogInformation(eventId, "products requested  at: {time} :  ", DateTimeOffset.UtcNow);
+            return  products;
         }
     }
 }

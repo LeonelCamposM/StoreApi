@@ -33,6 +33,20 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Logging
+.ClearProviders()
+.AddSimpleConsole(options => {
+    options.SingleLine = true;
+    options.TimestampFormat = "HH:mm:ss ";
+    options.UseUtcTimestamp = true;
+})
+.AddDebug()
+.AddApplicationInsights(
+telemetry =>
+telemetry.ConnectionString =
+builder.Configuration["Azure:ApplicationInsights:ConnectionString"],
+loggerOptions => { });
+
 
 
 var app = builder.Build();
