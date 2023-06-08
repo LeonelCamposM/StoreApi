@@ -35,10 +35,20 @@ else
 
 @code {
     private List<Product> products = new List<Product>();
+    private string category = "a";
+    private string orderBy = "d";
 
     protected override async Task OnInitializedAsync()
     {
-        products = await Http.GetFromJsonAsync<List<Product>>("https://localhost:7143/Products");
+        var response = await Http.GetAsync($"https://localhost:7143/Products?category={category}&orderBy={orderBy}");
+        if (response.IsSuccessStatusCode)
+        {
+            products = await response.Content.ReadFromJsonAsync<List<Product>>();
+        }
+        else
+        {
+            // Handle non-success status codes here
+        }
     }
 
 

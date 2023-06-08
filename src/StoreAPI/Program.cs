@@ -27,9 +27,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("BlazorCors", builder =>
     {
         builder
-            .WithOrigins("https://localhost:5001/")
-            .AllowAnyMethod()
-            .AllowAnyOrigin();
+        .AllowAnyMethod()
+        .AllowAnyOrigin();
     });
 });
 
