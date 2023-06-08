@@ -1,4 +1,6 @@
-﻿public interface IProductService
+﻿using Microsoft.AspNetCore.Mvc;
+
+public interface IProductService
 {
-    Task<IEnumerable<Product>> GetAllAsync();
+    Task<IEnumerable<Product>> GetAllAsync(string category, string orderBy);
 }

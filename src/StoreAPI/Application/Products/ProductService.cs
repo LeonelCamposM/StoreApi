@@ -1,4 +1,6 @@
-﻿public class ProductService : IProductService
+﻿using Microsoft.AspNetCore.Mvc;
+
+public class ProductService : IProductService
 {
     private readonly IProductRepository _productRepository;
 
@@ -7,8 +9,8 @@
         _productRepository = productRepository;
     }
 
-    public async Task<IEnumerable<Product>> GetAllAsync()
+    public async Task<IEnumerable<Product>> GetAllAsync(string category, string orderBy)
     {
-        return await _productRepository.GetAllAsync();
+        return await _productRepository.GetAllAsync(category, orderBy);
     }
 }
