@@ -11,6 +11,16 @@ public class ProductRepository : IProductRepository
         _firestoreDb = firebaseClient;
     }
 
+    public Task AddAsync(Product product)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task DeleteAsync(string id)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<IEnumerable<Product>> GetAllAsync(string category, string orderBy)
     {
         Console.WriteLine(category);
@@ -25,5 +35,15 @@ public class ProductRepository : IProductRepository
             products.Add(product);
         }
         return products;
+    }
+
+    public Task<Product> GetByidAsync(string id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task UpdateAsync(string id, Product product)
+    {
+        throw new NotImplementedException();
     }
 }
