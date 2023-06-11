@@ -1,0 +1,41 @@
+﻿@using Microsoft.AspNetCore.Components
+
+@page "/error/{statusCode:int}"
+
+<h1>Error: @StatusCode</h1>
+
+@if (StatusCode == 404)
+{
+    <p>Page not found.</p>
+}
+else if (StatusCode == 500)
+{
+    <p>Internal server error.</p>
+}
+else
+{
+    <p>Unknown error.</p>
+}
+
+@code {
+    [Parameter]
+    public int StatusCode { get; set; }
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
+
+    protected override void OnInitialized()
+    {
+        StatusCode = GetStatusCodeFromRoute();
+    }
+
+    private int GetStatusCodeFromRoute()
+    {
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        if (uri.Segments.Length >= 3 && int.TryParse(uri.Segments[2], out int statusCode))
+        {
+            return statusCode;
+        }
+        return 0; // Default value if the route parameter is not found or cannot be parsed
+    }
+}
