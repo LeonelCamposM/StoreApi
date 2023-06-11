@@ -51,7 +51,7 @@ namespace StoreAPI.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(eventId, ex, "An error occurred while adding product");
-                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred");
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Not implemented endpoint");
             }
         }
 
@@ -73,7 +73,7 @@ namespace StoreAPI.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(eventId, ex, "An error occurred while retrieving product with ID {id}", id);
-                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred");
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Not implemented endpoint");
             }
         }
 
@@ -90,7 +90,7 @@ namespace StoreAPI.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(eventId, ex, "An error occurred while updating product with ID {id}", id);
-                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred");
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Not implemented endpoint");
             }
         }
 
@@ -108,7 +108,7 @@ namespace StoreAPI.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(eventId, ex, "An error occurred while deleting product with ID {id}", id);
-                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred");
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Not implemented endpoint");
             }
         }
     }

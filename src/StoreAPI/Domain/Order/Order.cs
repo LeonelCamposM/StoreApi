@@ -1,7 +1,5 @@
 ﻿using Google.Cloud.Firestore;
-using Google.Protobuf.WellKnownTypes;
 using System.ComponentModel.DataAnnotations;
-using Timestamp = Google.Protobuf.WellKnownTypes.Timestamp;
 
 [FirestoreData]
 public class Order
@@ -17,14 +15,14 @@ public class Order
 
     [FirestoreProperty]
     [Required(ErrorMessage = "Date is required")]
-    public Timestamp Date { get; set; }
+    public string Date { get; set; }
 
     [FirestoreProperty]
     [EmailAddress]
     public string Email { get; set; }
 
 
-    public Order(string adress, double total, Timestamp date, string email)
+    public Order(string adress, double total, string date, string email)
     {
         Adress = adress;
         Total = total;
@@ -36,7 +34,7 @@ public class Order
     {
         Adress = "";
         Total = 0;
-        Date = DateTime.Now.ToTimestamp();
+        Date = "";
         Email = "";
     }
 }
