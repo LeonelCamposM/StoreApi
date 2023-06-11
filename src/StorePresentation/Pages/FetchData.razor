@@ -1,11 +1,13 @@
 ﻿@page "/fetchdata"
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 @using StorePresentation.Shared
 
 <PageTitle>Productos</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Productos de Juan</MudText>
 <MudText Class="mb-8">Productos disponibles</MudText>
+
 @if (products == null)
 {
     <MudProgressCircular Color="Color.Default" Indeterminate="true" />
@@ -35,12 +37,22 @@ else
 
 @code {
     private List<Product> products = new List<Product>();
+    private string category = "a";
+    private string orderBy = "d";
 
     protected override async Task OnInitializedAsync()
     {
-        products = await Http.GetFromJsonAsync<List<Product>>("https://localhost:7143/Products");
+        var response = await Http.GetAsync($"https://localhost:7143/Products?category={category}&orderBy={orderBy}");
+        if (response.IsSuccessStatusCode)
+        {
+            products = await response.Content.ReadFromJsonAsync<List<Product>>();
+        }
+        else
+        {
+            var statusCode = (int)response.StatusCode;
+            NavigationManager.NavigateTo($"/error/{statusCode}");
+        }
     }
-
 
     public class Product
     {
