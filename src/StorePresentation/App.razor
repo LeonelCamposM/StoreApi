@@ -1,11 +1,35 @@
+@inject NavigationManager NavigationManager
+
 <Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
     </Found>
     <NotFound>
         <PageTitle>Not found</PageTitle>
-        <LayoutView Layout="@typeof(MainLayout)">
-            <p role="alert">Sorry, there's nothing at this address.</p>
+        <LayoutView Layout="typeof(MainLayout)">
+            @{
+                var statusCodeString = NavigationManager.Uri.Split('/').LastOrDefault();
+                var statusCode = 0;
+                var errorMessage = "";
+
+                if (int.TryParse(statusCodeString, out statusCode))
+                {
+                    if (statusCode == 404)
+                    {
+                        errorMessage = "Sorry, there's nothing at this address.";
+                    }
+                    else if (statusCode == 500)
+                    {
+                        errorMessage = "Internal server error. Please try again later.";
+                    }
+                }
+
+                if (string.IsNullOrEmpty(errorMessage))
+                {
+                    errorMessage = "An error occurred.";
+                }
+            }
+            <p role="alert">@errorMessage</p>
         </LayoutView>
     </NotFound>
 </Router>
