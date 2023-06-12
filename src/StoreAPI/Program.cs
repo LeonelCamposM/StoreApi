@@ -1,5 +1,10 @@
 using Google.Api;
 using Google.Cloud.Firestore;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,7 +62,37 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    if (app.Configuration.GetValue<bool>("UseDeveloperExceptionPage"))
+        app.UseDeveloperExceptionPage();
+    else
+        app.UseExceptionHandler("/error");
+
 }
+
+app.MapGet("/error",
+[EnableCors("AnyOrigin")]
+[ResponseCache(NoStore = true)] (HttpContext context) =>
+{
+    var exceptionHandler = context.Features.Get<IExceptionHandlerPathFeature>();
+    var details = new ProblemDetails();
+    details.Detail = exceptionHandler?.Error.Message;
+    details.Extensions["traceId"] = System.Diagnostics.Activity.Current?.Id ?? context.TraceIdentifier;
+    details.Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1";
+    details.Status = StatusCodes.Status500InternalServerError;
+
+    // Check if the status code is 404
+    if (context.Response.StatusCode == StatusCodes.Status404NotFound)
+    {
+        details.Title = "Resource not found";
+        details.Status = StatusCodes.Status404NotFound;
+    }
+
+
+    context.Response.StatusCode = details.Status.Value;
+
+    return Results.Json(details);
+});
+
 
 app.UseHttpsRedirection();
 app.UseCors("BlazorCors");
