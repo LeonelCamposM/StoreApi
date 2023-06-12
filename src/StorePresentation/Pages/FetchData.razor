@@ -1,11 +1,13 @@
 ﻿@page "/fetchdata"
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 @using StorePresentation.Shared
 
 <PageTitle>Productos</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Productos de Juan</MudText>
 <MudText Class="mb-8">Productos disponibles</MudText>
+
 @if (products == null)
 {
     <MudProgressCircular Color="Color.Default" Indeterminate="true" />
@@ -47,10 +49,10 @@ else
         }
         else
         {
-            // Handle non-success status codes here
+            var statusCode = (int)response.StatusCode;
+            NavigationManager.NavigateTo($"/error/{statusCode}");
         }
     }
-
 
     public class Product
     {
