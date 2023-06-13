@@ -1,5 +1,6 @@
 using Google.Api;
 using Google.Cloud.Firestore;
+using GrpcService1;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddGrpcClient<Products.ProductsClient>();
 
 // Firebase DB Singletone
 string path = "key.json";

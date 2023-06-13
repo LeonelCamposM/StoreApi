@@ -111,5 +111,27 @@ namespace StoreAPI.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, "Not implemented endpoint");
             }
         }
+
+        [HttpGet("/GrpcService1/Product/{id}")]
+        public async Task<IActionResult> GetGrpcProduct(string id)
+        {
+            var eventId = new EventId(0003, "GetProductByID");
+            try
+            {
+                Product product = await _productService.GetByidAsync(id);
+                if (product == null)
+                {
+                    _logger.LogInformation(eventId, "No product found with ID {id} at: {time}", id, DateTimeOffset.UtcNow);
+                    return StatusCode((int)HttpStatusCode.NotFound, $"No product found with ID {id}");
+                }
+                _logger.LogInformation(eventId, "Product with ID {id} requested at: {time}", id, DateTimeOffset.UtcNow);
+                return Ok(product);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(eventId, ex, "An error occurred while retrieving product with ID {id}", id);
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Not implemented endpoint");
+            }
+        }
     }
 }
