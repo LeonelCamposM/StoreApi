@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using static GrpcService.Products;
 
 namespace StoreAPI.Controllers
 {
@@ -8,12 +9,14 @@ namespace StoreAPI.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly ProductsClient _productsClient;
         ILogger<ProductsController> _logger;
 
-        public ProductsController(IProductService productService, ILogger<ProductsController> logger)
+        public ProductsController(IProductService productService, ILogger<ProductsController> logger, ProductsClient client)
         {
             _productService = productService;
             _logger = logger;
+            _productsClient = client;
         }
 
         [HttpGet]
@@ -112,25 +115,23 @@ namespace StoreAPI.Controllers
             }
         }
 
-        [HttpGet("/GrpcService1/Product/{id}")]
+        [HttpGet("/grpc/product/{id}")]
         public async Task<IActionResult> GetGrpcProduct(string id)
         {
-            var eventId = new EventId(0003, "GetProductByID");
+            var eventId = new EventId(0006, "GetProductByID");
             try
             {
-                Product product = await _productService.GetByidAsync(id);
-                if (product == null)
+                var request = new GrpcService.ProductRequest
                 {
-                    _logger.LogInformation(eventId, "No product found with ID {id} at: {time}", id, DateTimeOffset.UtcNow);
-                    return StatusCode((int)HttpStatusCode.NotFound, $"No product found with ID {id}");
-                }
-                _logger.LogInformation(eventId, "Product with ID {id} requested at: {time}", id, DateTimeOffset.UtcNow);
-                return Ok(product);
+                    ProductID = id
+                };
+                var response =  _productsClient.Get(request);
+                return Ok(response.Product.ToString());
             }
             catch (Exception ex)
             {
                 _logger.LogError(eventId, ex, "An error occurred while retrieving product with ID {id}", id);
-                return StatusCode((int)HttpStatusCode.InternalServerError, "Not implemented endpoint");
+                return StatusCode((int)HttpStatusCode.InternalServerError, "error");
             }
         }
     }
