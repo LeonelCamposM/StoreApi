@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoreAPI", "StoreAPI\StoreA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StorePresentation", "StorePresentation\StorePresentation.csproj", "{0BE3C19C-92D9-4ADD-B08C-0F3811040E1A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrpcService", "GrpcService\GrpcService.csproj", "{43AEBBFA-20BE-4877-886D-BB41BB419E74}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{0BE3C19C-92D9-4ADD-B08C-0F3811040E1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0BE3C19C-92D9-4ADD-B08C-0F3811040E1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0BE3C19C-92D9-4ADD-B08C-0F3811040E1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43AEBBFA-20BE-4877-886D-BB41BB419E74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43AEBBFA-20BE-4877-886D-BB41BB419E74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43AEBBFA-20BE-4877-886D-BB41BB419E74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43AEBBFA-20BE-4877-886D-BB41BB419E74}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

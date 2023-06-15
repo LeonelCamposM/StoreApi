@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 src/StoreAPI/Key.json
+src/Integrantes.txt
+src/B91545_B72694_StoreApi.zip
