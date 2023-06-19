@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using static GrpcService.Products;
+using Microsoft.Identity.Web;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StoreAPI.Controllers
 {
@@ -20,6 +22,7 @@ namespace StoreAPI.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Get([FromQuery] string category, [FromQuery] string orderBy)
         {
             var eventId = new EventId(0001, "RequestedProducts");
@@ -42,6 +45,7 @@ namespace StoreAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Post([FromBody] Product product)
         {
             var eventId = new EventId(0002, "AddProduct");
@@ -81,6 +85,7 @@ namespace StoreAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> Put(string id, [FromBody] Product product)
         {
             var eventId = new EventId(0004, "UpdateProduct");
@@ -98,6 +103,7 @@ namespace StoreAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> Delete(string id)
         {
             var eventId = new EventId(0005, "DeleteProduct");

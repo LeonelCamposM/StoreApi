@@ -1,86 +1,60 @@
 ﻿@page "/fetchdata"
 @inject HttpClient Http
-@inject NavigationManager NavigationManager
-@using StorePresentation.Shared
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize]
 
-<PageTitle>Productos</PageTitle>
+<PageTitle>Weather forecast</PageTitle>
 
-<MudText Typo="Typo.h3" GutterBottom="true">Productos de Juan</MudText>
-<MudText Class="mb-8">Productos disponibles</MudText>
+<h1>Weather forecast</h1>
 
-@if (products == null)
+<p>This component demonstrates fetching data autorized from the server.</p>
+
+@if (forecasts == null)
 {
-    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+    <p><em>Loading...</em></p>
 }
 else
 {
-    <MudTable Items="@products">
-        <HeaderContent>
-            <MudTh>Nombre</MudTh>
-            <MudTh>Precio</MudTh>
-            <MudTh>Existencias</MudTh>
-            <MudTh>Imagen</MudTh>
-            <MudTh>Descripción</MudTh>
-            <MudTh>Categoría</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="Nombre">@context.Name</MudTd>
-            <MudTd DataLabel="Precio">@context.Price</MudTd>
-            <MudTd DataLabel="Existencias">@context.Stock</MudTd>
-            <MudTd DataLabel="Imagen">@context.Image</MudTd>
-            <MudTd DataLabel="Descripción">@context.Description</MudTd>
-            <MudTd DataLabel="Categoría">@context.Category</MudTd>
-        </RowTemplate>
-    </MudTable>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in forecasts)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@forecast.TemperatureF</td>
+                    <td>@forecast.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
 
-
 @code {
-    private List<Product> products = new List<Product>();
-    private string category = "a";
-    private string orderBy = "d";
+    private WeatherForecast[]? forecasts;
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await Http.GetAsync($"https://localhost:7143/Products?category={category}&orderBy={orderBy}");
-        if (response.IsSuccessStatusCode)
-        {
-            products = await response.Content.ReadFromJsonAsync<List<Product>>();
-        }
-        else
-        {
-            var statusCode = (int)response.StatusCode;
-            NavigationManager.NavigateTo($"/error/{statusCode}");
-        }
+        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
     }
 
-    public class Product
+    public class WeatherForecast
     {
+        public DateTime Date { get; set; }
 
-        public string Name { get; set; }
+        public int TemperatureC { get; set; }
 
-        public double Price { get; set; }
+        public string? Summary { get; set; }
 
-
-        public double Stock { get; set; }
-
-
-        public string Image { get; set; }
-
-        public string Description { get; set; }
-
-
-        public string Category { get; set; }
-
-
-        public Product(string name, double price, double stock, string image, string description, string category)
-        {
-            Name = name;
-            Price = price;
-            Stock = stock;
-            Image = image;
-            Description = description;
-            Category = category;
-        }
+        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
     }
 }

@@ -4,7 +4,8 @@ using GrpcService;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Identity.Web;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -56,7 +57,9 @@ telemetry.ConnectionString =
 builder.Configuration["Azure:ApplicationInsights:ConnectionString"],
 loggerOptions => { });
 
-
+// Add services to the container.
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAdB2C"));
 
 var app = builder.Build();
 
@@ -99,6 +102,8 @@ app.MapGet("/error",
 
 app.UseHttpsRedirection();
 app.UseCors("BlazorCors");
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
