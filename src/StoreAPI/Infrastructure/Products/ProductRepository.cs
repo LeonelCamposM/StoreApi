@@ -37,9 +37,19 @@ public class ProductRepository : IProductRepository
         return products;
     }
 
-    public Task<Product> GetByidAsync(string id)
+    public async Task<Product> GetByidAsync(string id)
     {
-        throw new NotImplementedException();
+        Console.WriteLine(id);
+        Query query = _firestoreDb.Collection("Products").WhereEqualTo("Id", id);
+        QuerySnapshot snapshot = await query.GetSnapshotAsync();
+        if (snapshot.Documents.Count == 0)
+        {
+            // Product with the given ID was not found
+            return null; 
+        }
+        DocumentSnapshot documentSnapshot = snapshot.Documents[0];
+        Product product = documentSnapshot.ConvertTo<Product>();
+        return product;
     }
 
     public Task UpdateAsync(string id, Product product)

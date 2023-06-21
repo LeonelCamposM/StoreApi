@@ -30,6 +30,6 @@ public class ProductService : IProductService
     }
     public async Task<Product> GetByidAsync(string id)
     {
-        throw new NotImplementedException();
+        return await _productRepository.GetByidAsync(id);
     }
 }
