@@ -11,9 +11,29 @@ public class ProductRepository : IProductRepository
         _firestoreDb = firebaseClient;
     }
 
-    public Task AddAsync(Product product)
+    public async Task AddAsync(Product product)
     {
-        throw new NotImplementedException();
+        // Get the maximum ID value from the existing products
+        Query query = _firestoreDb.Collection("Products").OrderByDescending("Id").Limit(1);
+        QuerySnapshot snapshot = await query.GetSnapshotAsync();
+        string maxId = "0";
+
+        if (snapshot.Documents.Count > 0)
+        {
+            DocumentSnapshot documentSnapshot = snapshot.Documents[0];
+            Product lastProduct = documentSnapshot.ConvertTo<Product>();
+            maxId = lastProduct.Id;
+        }
+
+        // Generate the next ID value
+        int newProductId = int.Parse(maxId) + 1;
+
+        // Set the generated ID for the product
+        product.Id = newProductId.ToString();
+
+        // Add the product to the Firestore database
+        DocumentReference documentRef = _firestoreDb.Collection("Products").Document(product.Id);
+        await documentRef.SetAsync(product);
     }
 
     public Task DeleteAsync(string id)
