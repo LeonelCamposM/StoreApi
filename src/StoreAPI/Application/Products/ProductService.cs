@@ -21,7 +21,7 @@ public class ProductService : IProductService
 
     public async Task DeleteAsync(string id)
     {
-        throw new NotImplementedException();
+        await _productRepository.DeleteAsync(id);
     }
 
     public async Task UpdateAsync(string id, Product product)

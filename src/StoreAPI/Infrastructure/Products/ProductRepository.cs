@@ -36,9 +36,20 @@ public class ProductRepository : IProductRepository
         await documentRef.SetAsync(product);
     }
 
-    public Task DeleteAsync(string id)
+    public async Task DeleteAsync(string id)
     {
-        throw new NotImplementedException();
+        // Check if the product exists using GetByidAsync
+        Product existingProduct = await GetByidAsync(id);
+
+        if (existingProduct == null)
+        {
+            // Product with the given ID was not found
+            throw new Exception("Product not found.");
+        }
+
+        // Delete the product from the Firestore database
+        DocumentReference documentRef = _firestoreDb.Collection("Products").Document(id);
+        await documentRef.DeleteAsync();
     }
 
     public async Task<IEnumerable<Product>> GetAllAsync(string category, string orderBy)
