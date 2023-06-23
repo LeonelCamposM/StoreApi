@@ -3,6 +3,7 @@ using System.Net;
 using static GrpcService.Products;
 using Microsoft.Identity.Web;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace StoreAPI.Controllers
 {
@@ -25,6 +26,8 @@ namespace StoreAPI.Controllers
         [Authorize]
         public async Task<IActionResult> Get([FromQuery] string category, [FromQuery] string orderBy)
         {
+            var identity = User.Identity as ClaimsIdentity;
+            var myClaim = identity.Claims.FirstOrDefault(c => c.Type == "extension_role");
             var eventId = new EventId(0001, "RequestedProducts");
             try
             {
