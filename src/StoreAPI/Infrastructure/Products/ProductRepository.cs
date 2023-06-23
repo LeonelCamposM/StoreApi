@@ -52,8 +52,24 @@ public class ProductRepository : IProductRepository
         return product;
     }
 
-    public Task UpdateAsync(string id, Product product)
+    public async Task UpdateAsync(string id, Product product)
     {
-        throw new NotImplementedException();
+        // First, check if the product exists using GetByidAsync
+        Product existingProduct = await GetByidAsync(id);
+
+        if (existingProduct == null)
+        {
+            // Product with the given ID was not found
+            throw new Exception("Product not found.");
+        }
+
+        // Update the product properties
+        existingProduct.Name = product.Name;
+        existingProduct.Description = product.Description;
+        existingProduct.Price = product.Price;
+
+        // Update the product in the Firestore database
+        DocumentReference documentRef = _firestoreDb.Collection("Products").Document(id);
+        await documentRef.SetAsync(existingProduct);
     }
 }
