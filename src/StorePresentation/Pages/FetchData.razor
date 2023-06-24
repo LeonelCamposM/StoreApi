@@ -6,7 +6,6 @@
 @using System.IdentityModel.Tokens.Jwt
 @inject IAccessTokenProvider TokenProvider
 @using Microsoft.AspNetCore.Identity
-
 @attribute [Authorize] 
 
 <PageTitle>Weather forecast</PageTitle>
@@ -21,10 +20,28 @@
 }
 else
 {
-    @if (GetUserRole(token_str) == @GetUserRole(token_str))
-    {
-        <p>You can only see this if you're in the '@GetUserRole(token_str)' role.</p>
-    }
+    <AuthorizeView>
+        @if (context.User.IsInRole("admin"))
+        {
+            <p>You are admin</p>
+        }
+        else
+        {
+            <p>You are not admin</p>
+        }
+    </AuthorizeView>
+
+     <AuthorizeView>
+        @if (context.User.IsInRole("client"))
+        {
+            <p>You are client</p>
+        }
+        else
+        {
+            <p>You are not client</p>
+        }
+    </AuthorizeView>
+
 
     <table class="table">
         <thead>
@@ -64,7 +81,6 @@ else
         if (tokenResult.TryGetToken(out var token))
         {
             token_str = token.Value;
-            GetUserRole(token_str);
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7143/Products?category={category}&orderBy={orderBy}");
             requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
             var response = await Http.SendAsync(requestMessage);
@@ -78,19 +94,6 @@ else
             }
         }
     }
-
-    private string GetUserRole(string token_str)
-    {
-        var role = "";
-        if(token_str != ""){
-            var handler = new JwtSecurityTokenHandler();
-            var token = handler.ReadJwtToken(token_str);
-            var userName = token.Claims.FirstOrDefault(c => c.Type == "given_name")?.Value;
-            role = token.Claims.FirstOrDefault(c => c.Type == "extension_role")?.Value;
-        }
-        return role;
-    }
-
 
     public class Product
     {
