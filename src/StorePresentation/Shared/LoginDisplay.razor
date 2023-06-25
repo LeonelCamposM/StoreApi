@@ -6,11 +6,11 @@
 
 <AuthorizeView>
     <Authorized>
-        Hello, @GlobalVariables.UserName
-        <button class="nav-link btn btn-link" @onclick="BeginLogout">Log out</button>
+        Hola, @GlobalVariables.UserName
+        <button class="nav-link btn btn-link" @onclick="BeginLogout">Salir</button>
     </Authorized>
     <NotAuthorized>
-        <a href="authentication/login">Log in</a>
+        <a href="authentication/login">Ingresar</a>
     </NotAuthorized>
 </AuthorizeView>
 
