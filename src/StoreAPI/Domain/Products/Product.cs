@@ -5,6 +5,10 @@ using System.ComponentModel.DataAnnotations;
 public class Product
 {
     [FirestoreProperty]
+    [Required(ErrorMessage = "Id is required")]
+    public string Id { get; set; }
+
+    [FirestoreProperty]
 	[Required(ErrorMessage = "Name is required")]
     public string Name { get; set; }
 
@@ -30,8 +34,9 @@ public class Product
     public string Category { get; set; }
 
 
-    public Product(string name, double price, double stock, string image, string description, string category)
+    public Product(string id, string name, double price, double stock, string image, string description, string category)
     {
+        Id = id;
         Name = name;
         Price = price;
         Stock = stock;
@@ -41,6 +46,7 @@ public class Product
     }
 
     public Product() {
+        Id = "";
         Name = "";
         Price = 0;
         Stock = 0;
