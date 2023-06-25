@@ -6,7 +6,7 @@
 
 <AuthorizeView>
     <Authorized>
-        Hola, @GlobalVariables.UserName
+        Hola, @GlobalVariables.GetUserName()
         <button class="nav-link btn btn-link" @onclick="BeginLogout">Salir</button>
     </Authorized>
     <NotAuthorized>

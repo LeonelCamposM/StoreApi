@@ -2,6 +2,16 @@
 {
     public class GlobalVariables
     {
-        public static string UserName { get; set; }
+        private static string? userName;
+
+        public static string GetUserName()
+        {
+            return userName!;
+        }
+
+        public static void SetUserName(string value)
+        {
+            userName = value;
+        }
     }
 }

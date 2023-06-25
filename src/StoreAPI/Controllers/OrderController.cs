@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 using System.Net;
 
 namespace StoreAPI.Controllers
@@ -17,6 +19,7 @@ namespace StoreAPI.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Get()
         {
             var eventId = new EventId(0001, "RequestedOrders");
