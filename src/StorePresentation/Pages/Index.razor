@@ -1,7 +1,137 @@
 ﻿@page "/"
+@inject HttpClient Http
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using System.Net.Http.Headers
+@inject IAccessTokenProvider TokenProvider
 
-<PageTitle>Inicio</PageTitle>
+<PageTitle>Nuevos productos</PageTitle>
 
-<h1>Hello, world!</h1>
 
-Welcome to your new app.
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Precio</th>
+            <th>Cantidad</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in products)
+        {
+            <tr>
+                <td>@product.Name</td>
+                <td>@product.Description</td>
+                <td>@product.Price</td>
+                <td>
+                    <form>
+                        <label for="cantidad">Cantidad:</label>
+                        <input type="number" id="cantidad" name="cantidad" min="1" max="100">
+                    </form>
+                </td>
+                <td> <button class="btn btn-primary" @onclick="IncrementCount">Agregar al carrito</button> </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code {
+    private List<Product> products = new List<Product>();
+    private string category = "a";
+    private string orderBy = "d";
+    private string token_str = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7143/Products?category={category}&orderBy={orderBy}");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+        var response = await Http.SendAsync(requestMessage);
+        if (response.IsSuccessStatusCode)
+        {
+            products = await response.Content.ReadFromJsonAsync<List<Product>>();
+        }
+        else
+        {
+            var statusCode = (int)response.StatusCode;
+        }
+    }
+
+    public class Product
+    {
+        public string Name { get; set; }
+        public double Price { get; set; }
+        public double Stock { get; set; }
+        public string Image { get; set; }
+        public string Description { get; set; }
+        public string Category { get; set; }
+
+        public Product(string name, double price, double stock, string image, string description, string category)
+        {
+            Name = name;
+            Price = price;
+            Stock = stock;
+            Image = image;
+            Description = description;
+            Category = category;
+        }
+    }
+
+    public class ShoppingCartItem
+    {
+        public Product SelectedProduct { get; set; }
+        public int Quantity { get; set; }
+
+        public ShoppingCartItem(Product selectedProduct, int quantity)
+        {
+            SelectedProduct = selectedProduct;
+            Quantity = quantity;
+        }
+    }
+
+    public class ShoppingCart
+    {
+        private List<ShoppingCartItem> _items = new List<ShoppingCartItem>();
+
+        public void AddItem(Product product, int quantity)
+        {
+            var existingItem = _items.FirstOrDefault(i => i.SelectedProduct.Name == product.Name);
+
+            if (existingItem != null)
+            {
+                existingItem.Quantity += quantity;
+            }
+            else
+            {
+                _items.Add(new ShoppingCartItem(product, quantity ));
+            }
+        }
+
+        public void RemoveItem(Product product)
+        {
+            var itemToRemove = _items.FirstOrDefault(i => i.SelectedProduct.Name == product.Name);
+
+            if (itemToRemove != null)
+            {
+                _items.Remove(itemToRemove);
+            }
+        }
+
+        public List<ShoppingCartItem> GetItems()
+        {
+            return _items;
+        }
+
+        public double GetTotal()
+        {
+            return _items.Sum(i => i.SelectedProduct.Price * i.Quantity);
+        }
+    }
+
+    void IncrementCount()
+    {
+        int currentCount = 0;
+        currentCount++;
+    }
+}
