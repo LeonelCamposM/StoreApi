@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
-
+using StoreAPI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -105,6 +105,8 @@ app.UseCors("BlazorCors");
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
+
+app.UseMiddleware<IdentityMiddleware>();
 
 app.UseAuthorization();
 

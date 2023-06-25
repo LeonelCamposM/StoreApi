@@ -6,7 +6,8 @@
 @using System.IdentityModel.Tokens.Jwt
 @inject IAccessTokenProvider TokenProvider
 @using Microsoft.AspNetCore.Identity
-@attribute [Authorize] 
+
+@attribute [Authorize(Roles = "admin")]
 
 <PageTitle>Weather forecast</PageTitle>
 
