@@ -11,14 +11,45 @@ public class ProductRepository : IProductRepository
         _firestoreDb = firebaseClient;
     }
 
-    public Task AddAsync(Product product)
+    public async Task AddAsync(Product product)
     {
-        throw new NotImplementedException();
+        // Get the maximum ID value from the existing products
+        Query query = _firestoreDb.Collection("Products").OrderByDescending("Id").Limit(1);
+        QuerySnapshot snapshot = await query.GetSnapshotAsync();
+        string maxId = "0";
+
+        if (snapshot.Documents.Count > 0)
+        {
+            DocumentSnapshot documentSnapshot = snapshot.Documents[0];
+            Product lastProduct = documentSnapshot.ConvertTo<Product>();
+            maxId = lastProduct.Id;
+        }
+
+        // Generate the next ID value
+        int newProductId = int.Parse(maxId) + 1;
+
+        // Set the generated ID for the product
+        product.Id = newProductId.ToString();
+
+        // Add the product to the Firestore database
+        DocumentReference documentRef = _firestoreDb.Collection("Products").Document(product.Id);
+        await documentRef.SetAsync(product);
     }
 
-    public Task DeleteAsync(string id)
+    public async Task DeleteAsync(string id)
     {
-        throw new NotImplementedException();
+        // Check if the product exists using GetByidAsync
+        Product existingProduct = await GetByidAsync(id);
+
+        if (existingProduct == null)
+        {
+            // Product with the given ID was not found
+            throw new Exception("Product not found.");
+        }
+
+        // Delete the product from the Firestore database
+        DocumentReference documentRef = _firestoreDb.Collection("Products").Document(id);
+        await documentRef.DeleteAsync();
     }
 
     public async Task<IEnumerable<Product>> GetAllAsync(string category, string orderBy)
@@ -37,13 +68,39 @@ public class ProductRepository : IProductRepository
         return products;
     }
 
-    public Task<Product> GetByidAsync(string id)
+    public async Task<Product> GetByidAsync(string id)
     {
-        throw new NotImplementedException();
+        Console.WriteLine(id);
+        Query query = _firestoreDb.Collection("Products").WhereEqualTo("Id", id);
+        QuerySnapshot snapshot = await query.GetSnapshotAsync();
+        if (snapshot.Documents.Count == 0)
+        {
+            // Product with the given ID was not found
+            return null; 
+        }
+        DocumentSnapshot documentSnapshot = snapshot.Documents[0];
+        Product product = documentSnapshot.ConvertTo<Product>();
+        return product;
     }
 
-    public Task UpdateAsync(string id, Product product)
+    public async Task UpdateAsync(string id, Product product)
     {
-        throw new NotImplementedException();
+        // First, check if the product exists using GetByidAsync
+        Product existingProduct = await GetByidAsync(id);
+
+        if (existingProduct == null)
+        {
+            // Product with the given ID was not found
+            throw new Exception("Product not found.");
+        }
+
+        // Update the product properties
+        existingProduct.Name = product.Name;
+        existingProduct.Description = product.Description;
+        existingProduct.Price = product.Price;
+
+        // Update the product in the Firestore database
+        DocumentReference documentRef = _firestoreDb.Collection("Products").Document(id);
+        await documentRef.SetAsync(existingProduct);
     }
 }

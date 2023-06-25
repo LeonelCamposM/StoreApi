@@ -16,20 +16,20 @@ public class ProductService : IProductService
 
     public async Task AddAsync(Product product)
     {
-        throw new NotImplementedException();
+        await _productRepository.AddAsync(product);
     }
 
     public async Task DeleteAsync(string id)
     {
-        throw new NotImplementedException();
+        await _productRepository.DeleteAsync(id);
     }
 
     public async Task UpdateAsync(string id, Product product)
     {
-        throw new NotImplementedException();
+        await _productRepository.UpdateAsync(id, product);
     }
     public async Task<Product> GetByidAsync(string id)
     {
-        throw new NotImplementedException();
+        return await _productRepository.GetByidAsync(id);
     }
 }

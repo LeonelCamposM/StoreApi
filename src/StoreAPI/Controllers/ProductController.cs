@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using static GrpcService.Products;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace StoreAPI.Controllers
 {
@@ -22,6 +24,10 @@ namespace StoreAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] string category, [FromQuery] string orderBy)
         {
+            var identity = User.Identity as ClaimsIdentity;
+            var myClaim = identity.Claims.FirstOrDefault(c => c.Type == "extension_role");
+
+
             var eventId = new EventId(0001, "RequestedProducts");
             try
             {
@@ -42,6 +48,7 @@ namespace StoreAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Post([FromBody] Product product)
         {
             var eventId = new EventId(0002, "AddProduct");
@@ -81,6 +88,7 @@ namespace StoreAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Put(string id, [FromBody] Product product)
         {
             var eventId = new EventId(0004, "UpdateProduct");
@@ -98,6 +106,7 @@ namespace StoreAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(string id)
         {
             var eventId = new EventId(0005, "DeleteProduct");

@@ -4,8 +4,9 @@ using GrpcService;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-
-
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Identity.Web;
+using StoreAPI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +29,6 @@ builder.Services.AddSingleton(provider =>
 
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -38,7 +38,9 @@ builder.Services.AddCors(options =>
     {
         builder
         .AllowAnyMethod()
+        .AllowAnyHeader()
         .AllowAnyOrigin();
+        
     });
 });
 
@@ -56,7 +58,9 @@ telemetry.ConnectionString =
 builder.Configuration["Azure:ApplicationInsights:ConnectionString"],
 loggerOptions => { });
 
-
+// Add services to the container.
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAdB2C"));
 
 var app = builder.Build();
 
@@ -96,9 +100,14 @@ app.MapGet("/error",
     return Results.Json(details);
 });
 
+app.UseCors("BlazorCors");
 
 app.UseHttpsRedirection();
-app.UseCors("BlazorCors");
+
+app.UseAuthentication();
+
+app.UseMiddleware<IdentityMiddleware>();
+
 app.UseAuthorization();
 
 app.MapControllers();
