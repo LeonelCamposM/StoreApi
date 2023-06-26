@@ -1,0 +1,95 @@
+﻿@inject HttpClient Http
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using System.Net.Http.Headers
+@inject IAccessTokenProvider TokenProvider
+
+<PageTitle>Ventas realizadas </PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+
+        <h2>Ventas realizadas </h2>
+
+        <br />
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in products)
+                {
+                    <tr>
+                        <th>@product.Image</th>
+                        <td>@product.Name</td>
+                        <td>@product.Price</td>
+                        <td>
+                            <form>
+                                <input type="number" id="cantidad" name="cantidad" min="1" max="100">
+                            </form>
+                        </td>
+                        <td>@product.Price*@product.Quantity</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button class="btn btn-primary" @onclick="checkOut">Realizar pago</button>
+    </Authorized>
+    <NotAuthorized>
+        <h2>Debe inciar sesión para consultar el carrito </h2>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private List<Product> products = new List<Product>();
+    private string category = "a";
+    private string orderBy = "d";
+    private string token_str = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7143/Products?category={category}&orderBy={orderBy}");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+        var response = await Http.SendAsync(requestMessage);
+        if (response.IsSuccessStatusCode)
+        {
+            products = await response.Content.ReadFromJsonAsync<List<Product>>();
+        }
+        else
+        {
+            var statusCode = (int)response.StatusCode;
+        }
+    }
+
+    public void checkOut(){
+
+    }
+
+    public class Product
+    {
+        public string Name { get; set; }
+        public double Price { get; set; }
+        public double Stock { get; set; }
+        public string Image { get; set; }
+        public string Description { get; set; }
+        public string Category { get; set; }
+        public int Quantity { get; set; }
+
+        public Product(string name, double price, double stock, string image, string description, string category)
+        {
+            Name = name;
+            Price = price;
+            Stock = stock;
+            Image = image;
+            Description = description;
+            Category = category;
+            Quantity = 0;
+        }
+    }
+
+}
