@@ -16,10 +16,22 @@ public class OrderRepository : IOrderRepository
         throw new NotImplementedException();
     }
 
-    public Task<IEnumerable<Order>> GetAllAsync()
+    public async Task<IEnumerable<Order>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        Query query = _firestoreDb.Collection("Orders");
+
+        QuerySnapshot snapshot = await query.GetSnapshotAsync();
+        List<Order> orders = new List<Order>();
+
+        foreach (DocumentSnapshot documentSnapshot in snapshot.Documents)
+        {
+            Order order = documentSnapshot.ConvertTo<Order>();
+            orders.Add(order);
+        }
+
+        return orders;
     }
+
 
     public Task<Order> GetByIdAsync(int orderId)
     {

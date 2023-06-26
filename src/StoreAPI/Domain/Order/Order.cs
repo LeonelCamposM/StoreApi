@@ -6,6 +6,10 @@ public class Order
 {
 
     [FirestoreProperty]
+    [Required(ErrorMessage = "Id is required")]
+    public string Id { get; set; }
+
+    [FirestoreProperty]
     [Required(ErrorMessage = "Adress is required")]
     public string Adress { get; set; }
 
@@ -22,8 +26,9 @@ public class Order
     public string Email { get; set; }
 
 
-    public Order(string adress, double total, string date, string email)
+    public Order(string id, string adress, double total, string date, string email)
     {
+        Id = id;
         Adress = adress;
         Total = total;
         Date = date;
@@ -32,6 +37,7 @@ public class Order
 
     public Order()
     {
+        Id = "";
         Adress = "";
         Total = 0;
         Date = "";

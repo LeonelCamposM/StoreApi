@@ -14,9 +14,9 @@ public class OrderService : IOrderService
         throw new NotImplementedException();
     }
 
-    public Task<IEnumerable<Order>> GetAllAsync()
+    public async Task<IEnumerable<Order>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        return await _orderRepository.GetAllAsync();
     }
 
     public Task<Order> GetByIdAsync(string orderId)
