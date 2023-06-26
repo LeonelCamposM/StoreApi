@@ -42,12 +42,13 @@ namespace StoreAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "client")]
         public async Task<IActionResult> Get(string id)
         {
             var eventId = new EventId(0003, "GetOrderById");
             try
             {
-                Order order = await _orderService.GetByIdAsync(id);
+                var order = await _orderService.GetByIdAsync(id);
                 if (order == null)
                 {
                     _logger.LogInformation(eventId, "No order found with ID {id} at: {time}", id, DateTimeOffset.UtcNow);

@@ -32,10 +32,10 @@
                 <td>
                     <AuthorizeView>
                         <Authorized>
-                            <button @onclick="(() => AddToCart(product))">Add to Cart</button>
+                            <button class="btn btn-primary" @onclick="(() => AddToCart(product))">Agrear al carrito</button>
                         </Authorized>
                         <NotAuthorized>
-                            <button disabled> Add to Cart</button>
+                            <button disabled class="btn btn-secondary">Agrear al carrito</button>
                         </NotAuthorized>
                     </AuthorizeView>
                 </td>
@@ -50,7 +50,7 @@
     private List<Product> products = new List<Product>();
 
     private string category = "a";
-    private string orderBy = "d";
+    private string orderBy = "a";
     private string token_str = "";
     private string notify = "";
 
@@ -107,7 +107,6 @@
         public string Image { get; set; }
         public string Description { get; set; }
         public string Category { get; set; }
-        //public int Quantity { get; set; }
 
         public Product(string id, string name, double price, double stock, string image, string description, string category)
         {
@@ -118,7 +117,6 @@
             Image = image;
             Description = description;
             Category = category;
-
         }
     }
 }
