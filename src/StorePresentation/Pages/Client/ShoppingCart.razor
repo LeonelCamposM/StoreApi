@@ -2,9 +2,12 @@
 @inject HttpClient Http
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using System.Net.Http.Headers
+
 @inject IAccessTokenProvider TokenProvider
 
 <PageTitle>Su lista de compras</PageTitle>
+
+<th>Notificación: @notify</th>
 
 <AuthorizeView>
     <Authorized>
@@ -15,6 +18,7 @@
         <table class="table">
             <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Imagen</th>
                     <th>Nombre</th>
                     <th>Precio</th>
@@ -26,12 +30,13 @@
                 @foreach (var product in products)
                 {
                     <tr>
+                        <td>@product.Id</td>
                         <td>@product.Image</td>
                         <td>@product.Name</td>
                         <td>@product.Price</td>
                         <td>
                             <form>
-                                <input type="number" id="cantidad" name="cantidad" min="1" max="100">
+                                <input type="number" id="cantidad" name="cantidad" min="1" max="100" @bind="product.Quantity">
                             </form>
                         </td>
                         <td>@product.Price*@product.Quantity</td>
@@ -40,7 +45,7 @@
             </tbody>
         </table>
         <button class="btn btn-primary" @onclick="CheckOut">Realizar pago</button>
-        <button class="btn btn-secondary" @onclick="CheckOut">Actualizar orden</button>
+        <button class="btn btn-secondary" @onclick="UpdateOrder">Actualizar orden</button>
     </Authorized>
     <NotAuthorized>
         <h2>Debe inciar sesión para consultar el carrito </h2>
@@ -54,40 +59,71 @@
     private string token_str = "";
     private string notify = "";
 
+    private async Task ShowNotification(string message)
+    {
+        notify = message;
+        StateHasChanged();
+        await Task.Delay(3000);
+        notify = "";
+        StateHasChanged();
+    }
+
+
     protected override async Task OnInitializedAsync()
+    {
+        await GetUpdatedOrder();
+    }
+
+    public async Task GetUpdatedOrder()
     {
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7143/Orders/" + GlobalVariables.GetUserEmail().Replace("@", "").Replace(".com", ""));
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
         var response = await Http.SendAsync(requestMessage);
+
         if (response.IsSuccessStatusCode)
         {
-            products = await response.Content.ReadFromJsonAsync<List<OrderItem>>();
-            notify = ("Orden cargada .");
-            StateHasChanged();
-            await Task.Delay(3000);
-            notify = ($"");
+            var updatedProducts = await response.Content.ReadFromJsonAsync<List<OrderItem>>();
+            if (updatedProducts != null)
+            {
+                products = updatedProducts;
+                await ShowNotification("Orden cargada.");
+            }
+            else
+            {
+                await ShowNotification("La orden actualizada está vacía.");
+            }
         }
         else
         {
-            var statusCode = (int)response.StatusCode;
-            notify = ("Error obteniendo orden.");
-            StateHasChanged();
-            await Task.Delay(3000);
-            notify = ($"");
+            await ShowNotification("Error obteniendo la orden.");
         }
     }
 
-    public void CheckOut(){
-
+    public async Task UpdateOrder()
+    {
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
+        var response = await Http.PutAsJsonAsync("https://localhost:7143/Orders/" + GlobalVariables.GetUserEmail().Replace("@", "").Replace(".com", ""), products);
+        if (response.IsSuccessStatusCode)
+        {
+            await ShowNotification("Orden actualizada.");
+        }
+        else
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Response Content: {responseContent}");
+            await ShowNotification("Error al actualizar la orden.");
+        }
+        
     }
 
-    public void UpdateOrder()
+    public void CheckOut()
     {
 
     }
 
     public class OrderItem
     {
+        public string Id { get; set; }
         public string Name { get; set; }
         public double Price { get; set; }
         public double Stock { get; set; }
@@ -96,8 +132,9 @@
         public string Category { get; set; }
         public double Quantity { get; set; }
 
-        public OrderItem(string name, double price, double stock, string image, string description, string category, double quantity)
+        public OrderItem(string id, string name, double price, double stock, string image, string description, string category, double quantity)
         {
+            Id = id; 
             Name = name;
             Price = price;
             Stock = stock;
@@ -107,5 +144,4 @@
             Quantity = quantity;
         }
     }
-
 }

@@ -58,8 +58,21 @@ public class OrderRepository : IOrderRepository
         return products;
     }
 
-    public Task UpdateAsync(string orderID, Order order)
+    public async Task UpdateAsync(string orderID, List<OrderItem> order)
     {
-        throw new NotImplementedException();
+        var userOrder = _firestoreDb.Collection("Orders").Document(orderID).Collection("items");
+
+        // Delete existing order items
+        QuerySnapshot existingItemsSnapshot = await userOrder.GetSnapshotAsync();
+        foreach (DocumentSnapshot documentSnapshot in existingItemsSnapshot.Documents)
+        {
+            await documentSnapshot.Reference.DeleteAsync();
+        }
+
+        // Add updated order items
+        foreach (OrderItem item in order)
+        {
+            await userOrder.AddAsync(item);
+        }
     }
 }

@@ -65,12 +65,12 @@ namespace StoreAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(string id, [FromBody] Order order)
+        public async Task<IActionResult> Put(string id, [FromBody] List<OrderItem> orderItems)
         {
             var eventId = new EventId(0004, "UpdateOrder");
             try
             {
-                await _orderService.UpdateAsync(id, order);
+                await _orderService.UpdateAsync(id, orderItems);
                 _logger.LogInformation(eventId, "Order with ID {id} updated at: {time}", id, DateTimeOffset.UtcNow);
                 return Ok();
             }

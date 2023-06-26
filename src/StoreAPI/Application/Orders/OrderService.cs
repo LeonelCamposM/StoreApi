@@ -29,8 +29,8 @@ public class OrderService : IOrderService
        return await _orderRepository.GetByIdAsync(orderID);
     }
 
-    public Task UpdateAsync(string orderID, Order order)
+    public async Task UpdateAsync(string orderID, List<OrderItem> orderItems)
     {
-        throw new NotImplementedException();
+         await _orderRepository.UpdateAsync(orderID, orderItems);
     }
 }
