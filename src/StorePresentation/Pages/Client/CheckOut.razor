@@ -109,11 +109,15 @@
         if (response.IsSuccessStatusCode)
         {     
             await ShowNotification("Orden completada.");
+
         }
         else
         {
             await ShowNotification("Error completando la orden.");
         }
+        await GetUpdatedOrder();
+        StateHasChanged();
+
     }
 
     public class Order

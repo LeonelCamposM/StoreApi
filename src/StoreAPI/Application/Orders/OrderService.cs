@@ -14,9 +14,9 @@ public class OrderService : IOrderService
         await _orderRepository.AddToOrderAsync(product, orderID);
     }
 
-    public Task CheckOut(string orderID)
+    public async Task CheckOut(Order order, string orderID)
     {
-        throw new NotImplementedException();
+        await _orderRepository.CheckOut(order, orderID);
     }
 
     public async Task<IEnumerable<Order>> GetAllAsync()

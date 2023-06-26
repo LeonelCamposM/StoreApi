@@ -82,12 +82,12 @@ namespace StoreAPI.Controllers
         }
 
         [HttpPost("{id}/checkOut")]
-        public async Task<IActionResult> CheckOut(string id)
+        public async Task<IActionResult> CheckOut(string id, [FromBody] Order order)
         {
             var eventId = new EventId(0006, "CheckOutOrder");
             try
             {
-                await _orderService.CheckOut(id);
+                await _orderService.CheckOut(order, id);
                 _logger.LogInformation(eventId, "Order checked out at: {time}", DateTimeOffset.UtcNow);
                 return Ok();
             }

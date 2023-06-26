@@ -30,9 +30,23 @@ public class OrderRepository : IOrderRepository
         }
     }
 
-    public Task CheckOut(string orderID)
+    public async Task CheckOut(Order order, string orderID)
     {
-        throw new NotImplementedException();
+        var userOrder = _firestoreDb.Collection("ProcessedOrders").Document();
+        await userOrder.SetAsync(order);
+        List<OrderItem> orderItems = await GetByIdAsync(orderID);
+        var orderItemsCollection = _firestoreDb.Collection("Orders").Document(orderID).Collection("items");
+        foreach (OrderItem item in orderItems)
+        {
+            await userOrder.Collection("items").AddAsync(item);
+        }
+
+        QuerySnapshot existingItemsSnapshot = await orderItemsCollection.GetSnapshotAsync();
+        foreach (DocumentSnapshot documentSnapshot in existingItemsSnapshot.Documents)
+        {
+            await documentSnapshot.Reference.DeleteAsync();
+        }
+
     }
 
     public async Task<IEnumerable<Order>> GetAllAsync()
