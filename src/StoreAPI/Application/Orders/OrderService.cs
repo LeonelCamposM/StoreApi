@@ -9,6 +9,11 @@ public class OrderService : IOrderService
         _orderRepository = orderRepository;
     }
 
+    public async Task AddToOrderAsync(Product product, string orderID)
+    {
+        await _orderRepository.AddToOrderAsync(product, orderID);
+    }
+
     public Task CheckOut(string orderID)
     {
         throw new NotImplementedException();

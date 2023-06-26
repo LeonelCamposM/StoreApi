@@ -23,27 +23,29 @@ namespace StorePresentation.Infrastructure
                 var tokenResult = await TokenProvider.RequestAccessToken();
                 if (tokenResult.TryGetToken(out var token))
                 {
-                    var result = GetUserRole(token.Value);
-                    role = result.Item1;
-                    GlobalVariables.SetUserName(result.Item2);
+                    var result = role = GetUserRole(token.Value);
                 }
                 userIdentity!.AddClaim(new Claim(ClaimTypes.Role, role));
             }
             return initialUser;
         }
 
-        private (string role, string userName) GetUserRole(string token_str)
+        private string GetUserRole(string token_str)
         {
             var role = "";
             var userName = "";
             if (token_str != "")
             {
                 var handler = new JwtSecurityTokenHandler();
+                GlobalVariables.SetUserToken(token_str);
                 var token = handler.ReadJwtToken(token_str);
                 userName = token.Claims.FirstOrDefault(c => c.Type == "given_name")?.Value;
+                GlobalVariables.SetUserName(userName!);
+                var emails = token.Claims.FirstOrDefault(c => c.Type == "emails")?.Value;
+                GlobalVariables.SetUserEmail(emails!);
                 role = token.Claims.FirstOrDefault(c => c.Type == "extension_role")?.Value;
             }
-            return (role!, userName!);
+            return role!;
         }
     }
 }
