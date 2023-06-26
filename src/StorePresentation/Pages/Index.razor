@@ -6,6 +6,8 @@
 
 <PageTitle>Productos disponibles</PageTitle>
 
+<th>Notificación: @notify</th>
+<br />
 <h2>Productos disponibles</h2>
 <br />
 <table class="table">
@@ -41,28 +43,17 @@
                 </td>
             </tr>
         }
-
-        <h2>cart</h2>
-        @foreach (var product in shoppingCart)
-        {
-            <tr>
-                <td>@product.Image</td>
-                <td>@product.Name</td>
-                <td>@product.Description</td>
-                <td>@product.Price</td>
-            </tr>
-        }
     </tbody>
 </table>
 
 
 @code {
     private List<Product> products = new List<Product>();
-    private List<Product> shoppingCart = new List<Product>();
 
     private string category = "a";
     private string orderBy = "d";
     private string token_str = "";
+    private string notify= "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -71,11 +62,18 @@
         if (response.IsSuccessStatusCode)
         {
             products = await response.Content.ReadFromJsonAsync<List<Product>>();
+            notify = ($"Productos cargados");
+            StateHasChanged();
+            await Task.Delay(3000);
+            notify = ($"");
         }
         else
         {
             var statusCode = (int)response.StatusCode;
-            Console.WriteLine($"Eror agregando producto.");
+            notify = ($"Eror cargando productos.");
+            StateHasChanged();
+            await Task.Delay(3000);
+            notify = ($"");
         }
     }
 
@@ -86,12 +84,18 @@
 
         if (response.IsSuccessStatusCode)
         {
-            Console.WriteLine("Producto agregado.");
+            notify = ("Producto agregado.");
+            StateHasChanged();
+            await Task.Delay(3000);
+            notify = ($"");
         }
         else
         {
             var statusCode = (int)response.StatusCode;
-            Console.WriteLine($"Eror agregando producto.");
+            notify = ($"Eror agregando producto.");
+            StateHasChanged();
+            await Task.Delay(3000);
+            notify = ($"");
         }
     }
 
