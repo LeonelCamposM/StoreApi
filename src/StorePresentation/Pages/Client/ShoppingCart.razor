@@ -4,6 +4,7 @@
 @using System.Net.Http.Headers
 
 @inject IAccessTokenProvider TokenProvider
+@inject NavigationManager NavigationManager
 
 <PageTitle>Su lista de compras</PageTitle>
 
@@ -21,7 +22,7 @@
                     <th>ID</th>
                     <th>Imagen</th>
                     <th>Nombre</th>
-                    <th>Precio</th>
+                    <th>Precio unitario</th>
                     <th>Cantidad</th>
                     <th>Total</th>
                 </tr>
@@ -33,13 +34,13 @@
                         <td>@product.Id</td>
                         <td>@product.Image</td>
                         <td>@product.Name</td>
-                        <td>@product.Price</td>
+                        <td>₡@product.Price</td>
                         <td>
                             <form>
                                 <input type="number" id="cantidad" name="cantidad" min="1" max="100" @bind="product.Quantity">
                             </form>
                         </td>
-                        <td>@product.Price*@product.Quantity</td>
+                        <td>₡@(product.Price * product.Quantity)</td>
                     </tr>
                 }
             </tbody>
@@ -118,7 +119,7 @@
 
     public void CheckOut()
     {
-
+        NavigationManager.NavigateTo("/checkout");
     }
 
     public class OrderItem
