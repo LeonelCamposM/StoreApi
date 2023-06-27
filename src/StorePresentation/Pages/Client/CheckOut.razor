@@ -1,4 +1,4 @@
-﻿@page "/checkout"
+﻿@page "/cart"
 @inject HttpClient Http
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using System.Net.Http.Headers
@@ -32,7 +32,11 @@
                 <td>@product.Image</td>
                 <td>@product.Name</td>
                 <td>₡@product.Price</td>
-                <td>@product.Quantity</td>
+                <td>
+                    <form>
+                        <input type="number" id="cantidad" name="cantidad" min="1" max="100" @bind="product.Quantity">
+                    </form>
+                </td>
                 <td>₡@(product.Price * product.Quantity)</td>
             </tr>
         }
@@ -45,7 +49,7 @@
 <br />
 
 <br />
-<EditForm Model="@order" OnValidSubmit="PlaceOrder">
+<EditForm Model="@order" OnValidSubmit="CheckOutOrder">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -55,7 +59,8 @@
         <ValidationMessage For="@(() => order.Address)" />
     </div>
     <br />
-    <button type="submit" class="btn btn-primary">Confirmar Orden</button>
+    <button type="submit" class="btn btn-primary">Confirmar Orden</button> 
+    <button type="button" class="btn btn-secondary" @onclick="UpdateOrder">Actualizar orden</button>
 </EditForm>
 
 @code {
@@ -86,7 +91,6 @@
         if (response.IsSuccessStatusCode)
         {
             products = await response.Content.ReadFromJsonAsync<List<OrderItem>>();
-            await ShowNotification("Orden cargada.");
         }
         else
         {
@@ -94,21 +98,36 @@
         }
     }
 
-    public async Task PlaceOrder()
+    public async Task CheckOutOrder()
     {
         Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
         var response = await Http.PostAsJsonAsync("https://localhost:7143/Orders/" + GlobalVariables.GetUserEmail().Replace("@", "").Replace(".com", "") + "/checkOut", order);
         if (response.IsSuccessStatusCode)
-        {     
-            await ShowNotification("Orden completada.");
-
+        {
+            order.Address = "";
         }
         else
         {
             await ShowNotification("Error completando la orden.");
         }
         await GetUpdatedOrder();
-        StateHasChanged();
+        await ShowNotification("Orden completada.");
+    }
+
+    public async Task UpdateOrder()
+    {
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
+        var response = await Http.PutAsJsonAsync("https://localhost:7143/Orders/" + GlobalVariables.GetUserEmail().Replace("@", "").Replace(".com", ""), products);
+        if (response.IsSuccessStatusCode)
+        {
+            await ShowNotification("Orden actualizada.");
+        }
+        else
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Response Content: {responseContent}");
+            await ShowNotification("Error al actualizar la orden.");
+        }
 
     }
 
