@@ -9,23 +9,28 @@ public class OrderService : IOrderService
         _orderRepository = orderRepository;
     }
 
-    public Task CheckOut(string orderID)
+    public async Task AddToOrderAsync(Product product, string orderID)
     {
-        throw new NotImplementedException();
+        await _orderRepository.AddToOrderAsync(product, orderID);
     }
 
-    public Task<IEnumerable<Order>> GetAllAsync()
+    public async Task CheckOut(Order order, string orderID)
     {
-        throw new NotImplementedException();
+        await _orderRepository.CheckOut(order, orderID);
     }
 
-    public Task<Order> GetByIdAsync(string orderId)
+    public async Task<IEnumerable<Order>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        return await _orderRepository.GetAllAsync();
     }
 
-    public Task UpdateAsync(string orderID, Order order)
+    public async Task<List<OrderItem>> GetByIdAsync(string orderID)
     {
-        throw new NotImplementedException();
+       return await _orderRepository.GetByIdAsync(orderID);
+    }
+
+    public async Task UpdateAsync(string orderID, List<OrderItem> orderItems)
+    {
+         await _orderRepository.UpdateAsync(orderID, orderItems);
     }
 }

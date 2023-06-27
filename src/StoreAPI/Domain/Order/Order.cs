@@ -6,8 +6,8 @@ public class Order
 {
 
     [FirestoreProperty]
-    [Required(ErrorMessage = "Adress is required")]
-    public string Adress { get; set; }
+    [Required(ErrorMessage = "Address is required")]
+    public string Address { get; set; }
 
     [FirestoreProperty]
     [Range(0, double.MaxValue, ErrorMessage = "Total must be a positive value")]
@@ -22,9 +22,10 @@ public class Order
     public string Email { get; set; }
 
 
-    public Order(string adress, double total, string date, string email)
+    public Order(string address, double total, string date, string email)
     {
-        Adress = adress;
+
+        Address = address;
         Total = total;
         Date = date;
         Email = email;
@@ -32,7 +33,8 @@ public class Order
 
     public Order()
     {
-        Adress = "";
+        
+        Address = "";
         Total = 0;
         Date = "";
         Email = "";

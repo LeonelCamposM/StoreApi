@@ -1,0 +1,134 @@
+﻿@page "/cart"
+@inject HttpClient Http
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using System.Net.Http.Headers
+@using System.ComponentModel.DataAnnotations
+@using StorePresentation.Domain
+
+<PageTitle>Checkout</PageTitle>
+
+<h2>Checkout</h2>
+
+<th>Notificación: @notify</th>
+
+<h2>Resumen de su orden</h2>
+<br />
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Imagen</th>
+            <th>Nombre</th>
+            <th>Precio unitario</th>
+            <th>Cantidad</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in products)
+        {
+            <tr>
+                <td>@product.Id</td>
+                <td>@product.Image</td>
+                <td>@product.Name</td>
+                <td>₡@product.Price</td>
+                <td>
+                    <form>
+                        <input type="number" id="cantidad" name="cantidad" min="1" max="100" @bind="product.Quantity">
+                    </form>
+                </td>
+                <td>₡@(product.Price * product.Quantity)</td>
+            </tr>
+        }
+        <tr>
+            <td colspan="5"><strong>Total de la orden:</strong></td>
+            <td>₡@products.Sum(p => p.Price * p.Quantity)</td>
+        </tr>
+    </tbody>
+</table>
+<br />
+
+<br />
+<EditForm Model="@order" OnValidSubmit="CheckOutOrder">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="address">Address:</label>
+        <InputText id="address" class="form-control" @bind-Value="order.Address" />
+        <ValidationMessage For="@(() => order.Address)" />
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">Confirmar Orden</button> 
+    <button type="button" class="btn btn-secondary" @onclick="UpdateOrder">Actualizar orden</button>
+</EditForm>
+
+@code {
+    private Order order = new Order("", 0, DateTime.Now, GlobalVariables.GetUserEmail());
+    private string notify = "";
+    private List<OrderItem> products = new List<OrderItem>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetUpdatedOrder();
+    }
+
+    private async Task ShowNotification(string message)
+    {
+        notify = message;
+        StateHasChanged();
+        await Task.Delay(3000);
+        notify = "";
+        StateHasChanged();
+    }
+
+    public async Task GetUpdatedOrder()
+    {
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7143/Orders/" + GlobalVariables.GetUserEmail().Replace("@", "").Replace(".com", ""));
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
+        var response = await Http.SendAsync(requestMessage);
+
+        if (response.IsSuccessStatusCode)
+        {
+            products = await response.Content.ReadFromJsonAsync<List<OrderItem>>();
+        }
+        else
+        {
+            await ShowNotification("Error obteniendo la orden.");
+        }
+    }
+
+    public async Task CheckOutOrder()
+    {
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
+        var response = await Http.PostAsJsonAsync("https://localhost:7143/Orders/" + GlobalVariables.GetUserEmail().Replace("@", "").Replace(".com", "") + "/checkOut", order);
+        if (response.IsSuccessStatusCode)
+        {
+            order.Address = "";
+        }
+        else
+        {
+            await ShowNotification("Error completando la orden.");
+        }
+        await GetUpdatedOrder();
+        await ShowNotification("Orden completada.");
+    }
+
+    public async Task UpdateOrder()
+    {
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
+        var response = await Http.PutAsJsonAsync("https://localhost:7143/Orders/" + GlobalVariables.GetUserEmail().Replace("@", "").Replace(".com", ""), products);
+        if (response.IsSuccessStatusCode)
+        {
+            await ShowNotification("Orden actualizada.");
+        }
+        else
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Response Content: {responseContent}");
+            await ShowNotification("Error al actualizar la orden.");
+        }
+
+    }
+
+}

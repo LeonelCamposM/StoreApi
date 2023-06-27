@@ -1,0 +1,101 @@
+﻿@inject HttpClient Http
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using System.Net.Http.Headers
+@using StorePresentation.Domain
+@inject IAccessTokenProvider TokenProvider
+
+<PageTitle>Productos disponibles</PageTitle>
+
+<th>Notificación: @notify</th>
+<br />
+<h2>Productos disponibles</h2>
+<br />
+<table class="table">
+    <thead>
+        <tr>
+            <th>Imagen</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Precio unitario</th>
+            <th>Acción</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in products)
+        {
+            <tr>
+                <td>@product.Image</td>
+                <td>@product.Name</td>
+                <td>@product.Description</td>
+                <td>₡@product.Price</td>
+                <td>
+                <td>
+                    <AuthorizeView>
+                        <Authorized>
+                            <button class="btn btn-primary" @onclick="(() => AddToCart(product))">Agrear al carrito</button>
+                        </Authorized>
+                        <NotAuthorized>
+                            <button disabled class="btn btn-secondary">Agrear al carrito</button>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </td>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code {
+    private List<Product> products = new List<Product>();
+    private string category = "a";
+    private string orderBy = "a";
+    private string token_str = "";
+    private string notify = "";
+
+    private async Task ShowNotification(string message)
+    {
+        notify = message;
+        StateHasChanged();
+        await Task.Delay(3000);
+        notify = "";
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetUpdatedOrder();
+    }
+
+    public async Task GetUpdatedOrder()
+    {
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7143/Products?category={category}&orderBy={orderBy}");
+        var response = await Http.SendAsync(requestMessage);
+        if (response.IsSuccessStatusCode)
+        {
+            products = await response.Content.ReadFromJsonAsync<List<Product>>();
+            await ShowNotification("Productos cargados.");
+        }
+        else
+        {
+            await ShowNotification("Eror cargando productos.");
+        }
+    }
+
+    public async Task AddToCart(Product product)
+    {
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
+        var response = await Http.PostAsJsonAsync("https://localhost:7143/Orders/" + GlobalVariables.GetUserEmail().Replace("@", "").Replace(".com", ""), product);
+
+        if (response.IsSuccessStatusCode)
+        {
+            await ShowNotification("Producto agregado.");
+        }
+        else
+        {
+            var statusCode = (int)response.StatusCode;
+            await ShowNotification("Eror agregando producto.");
+        }
+    }
+}

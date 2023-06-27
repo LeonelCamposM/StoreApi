@@ -41,14 +41,14 @@ namespace StoreAPI.Controllers
             }
         }
 
-
         [HttpGet("{id}")]
+        [Authorize(Roles = "client")]
         public async Task<IActionResult> Get(string id)
         {
             var eventId = new EventId(0003, "GetOrderById");
             try
             {
-                Order order = await _orderService.GetByIdAsync(id);
+                var order = await _orderService.GetByIdAsync(id);
                 if (order == null)
                 {
                     _logger.LogInformation(eventId, "No order found with ID {id} at: {time}", id, DateTimeOffset.UtcNow);
@@ -65,12 +65,12 @@ namespace StoreAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(string id, [FromBody] Order order)
+        public async Task<IActionResult> Put(string id, [FromBody] List<OrderItem> orderItems)
         {
             var eventId = new EventId(0004, "UpdateOrder");
             try
             {
-                await _orderService.UpdateAsync(id, order);
+                await _orderService.UpdateAsync(id, orderItems);
                 _logger.LogInformation(eventId, "Order with ID {id} updated at: {time}", id, DateTimeOffset.UtcNow);
                 return Ok();
             }
@@ -81,19 +81,38 @@ namespace StoreAPI.Controllers
             }
         }
 
-        [HttpPost("{orderId}/checkOut")]
-        public async Task<IActionResult> CheckOut(string orderId)
+        [HttpPost("{id}/checkOut")]
+        public async Task<IActionResult> CheckOut(string id, [FromBody] Order order)
         {
             var eventId = new EventId(0006, "CheckOutOrder");
             try
             {
-                await _orderService.CheckOut(orderId);
+                await _orderService.CheckOut(order, id);
                 _logger.LogInformation(eventId, "Order checked out at: {time}", DateTimeOffset.UtcNow);
                 return Ok();
             }
             catch (Exception ex)
             {
                 _logger.LogError(eventId, ex, "An error occurred while checking out order");
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Not implemented endpoint");
+            }
+        }
+
+
+        [HttpPost("{id}")]
+        [Authorize(Roles = "client")]
+        public async Task<IActionResult> Post(string id, [FromBody] Product product)
+        {
+            var eventId = new EventId(0007, "AddToCart");
+            try
+            {
+                await _orderService.AddToOrderAsync(product, id);
+                _logger.LogInformation(eventId, "AddToCart at: {time}", DateTimeOffset.UtcNow);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(eventId, ex, "An error occurred while AddToCart ");
                 return StatusCode((int)HttpStatusCode.InternalServerError, "Not implemented endpoint");
             }
         }
