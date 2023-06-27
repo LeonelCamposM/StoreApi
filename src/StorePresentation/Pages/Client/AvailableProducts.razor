@@ -1,6 +1,7 @@
 ﻿@inject HttpClient Http
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using System.Net.Http.Headers
+@using StorePresentation.Domain
 @inject IAccessTokenProvider TokenProvider
 
 <PageTitle>Productos disponibles</PageTitle>
@@ -48,31 +49,37 @@
 
 @code {
     private List<Product> products = new List<Product>();
-
     private string category = "a";
     private string orderBy = "a";
     private string token_str = "";
     private string notify = "";
 
+    private async Task ShowNotification(string message)
+    {
+        notify = message;
+        StateHasChanged();
+        await Task.Delay(3000);
+        notify = "";
+        StateHasChanged();
+    }
+
     protected override async Task OnInitializedAsync()
+    {
+        await GetUpdatedOrder();
+    }
+
+    public async Task GetUpdatedOrder()
     {
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7143/Products?category={category}&orderBy={orderBy}");
         var response = await Http.SendAsync(requestMessage);
         if (response.IsSuccessStatusCode)
         {
             products = await response.Content.ReadFromJsonAsync<List<Product>>();
-            notify = ($"Productos cargados");
-            StateHasChanged();
-            await Task.Delay(3000);
-            notify = ($"");
+            await ShowNotification("Productos cargados.");
         }
         else
         {
-            var statusCode = (int)response.StatusCode;
-            notify = ($"Eror cargando productos.");
-            StateHasChanged();
-            await Task.Delay(3000);
-            notify = ($"");
+            await ShowNotification("Eror cargando productos.");
         }
     }
 
@@ -83,40 +90,12 @@
 
         if (response.IsSuccessStatusCode)
         {
-            notify = ("Producto agregado.");
-            StateHasChanged();
-            await Task.Delay(3000);
-            notify = ($"");
+            await ShowNotification("Producto agregado.");
         }
         else
         {
             var statusCode = (int)response.StatusCode;
-            notify = ($"Eror agregando producto.");
-            StateHasChanged();
-            await Task.Delay(3000);
-            notify = ($"");
-        }
-    }
-
-    public class Product
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public double Price { get; set; }
-        public double Stock { get; set; }
-        public string Image { get; set; }
-        public string Description { get; set; }
-        public string Category { get; set; }
-
-        public Product(string id, string name, double price, double stock, string image, string description, string category)
-        {
-            Id = id;
-            Name = name;
-            Price = price;
-            Stock = stock;
-            Image = image;
-            Description = description;
-            Category = category;
+            await ShowNotification("Eror agregando producto.");
         }
     }
 }

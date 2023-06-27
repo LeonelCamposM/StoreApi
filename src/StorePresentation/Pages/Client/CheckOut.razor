@@ -3,7 +3,7 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using System.Net.Http.Headers
 @using System.ComponentModel.DataAnnotations
-@using static StorePresentation.Pages.Client.ShoppingCart
+@using StorePresentation.Domain
 
 <PageTitle>Checkout</PageTitle>
 
@@ -85,16 +85,8 @@
 
         if (response.IsSuccessStatusCode)
         {
-            var updatedProducts = await response.Content.ReadFromJsonAsync<List<OrderItem>>();
-            if (updatedProducts != null)
-            {
-                products = updatedProducts;
-                await ShowNotification("Orden cargada.");
-            }
-            else
-            {
-                await ShowNotification("La orden actualizada está vacía.");
-            }
+            products = await response.Content.ReadFromJsonAsync<List<OrderItem>>();
+            await ShowNotification("Orden cargada.");
         }
         else
         {
@@ -118,22 +110,6 @@
         await GetUpdatedOrder();
         StateHasChanged();
 
-    }
-
-    public class Order
-    {
-        public string Address { get; set; }
-        public double Total { get; set; }
-        public DateTime Date { get; set; }
-        public string Email { get; set; }
-
-        public Order(string address, double total, DateTime date, string email)
-        {
-            Address = address;
-            Total = total;
-            Date = date;
-            Email = email;
-        }
     }
 
 }

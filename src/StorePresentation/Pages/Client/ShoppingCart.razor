@@ -2,6 +2,7 @@
 @inject HttpClient Http
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using System.Net.Http.Headers
+@using StorePresentation.Domain
 
 @inject IAccessTokenProvider TokenProvider
 @inject NavigationManager NavigationManager
@@ -83,16 +84,8 @@
 
         if (response.IsSuccessStatusCode)
         {
-            var updatedProducts = await response.Content.ReadFromJsonAsync<List<OrderItem>>();
-            if (updatedProducts != null)
-            {
-                products = updatedProducts;
-                await ShowNotification("Orden cargada.");
-            }
-            else
-            {
-                await ShowNotification("La orden actualizada está vacía.");
-            }
+            products = await response.Content.ReadFromJsonAsync<List<OrderItem>>();
+            await ShowNotification("Orden cargada.");
         }
         else
         {
@@ -120,29 +113,5 @@
     public void CheckOut()
     {
         NavigationManager.NavigateTo("/checkout");
-    }
-
-    public class OrderItem
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public double Price { get; set; }
-        public double Stock { get; set; }
-        public string Image { get; set; }
-        public string Description { get; set; }
-        public string Category { get; set; }
-        public double Quantity { get; set; }
-
-        public OrderItem(string id, string name, double price, double stock, string image, string description, string category, double quantity)
-        {
-            Id = id; 
-            Name = name;
-            Price = price;
-            Stock = stock;
-            Image = image;
-            Description = description;
-            Category = category;
-            Quantity = quantity;
-        }
     }
 }
