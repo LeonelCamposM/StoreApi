@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using StoreAPI.Domain.Order;
 using System.Data;
 using System.Net;
 
@@ -25,7 +26,7 @@ namespace StoreAPI.Controllers
             var eventId = new EventId(0001, "RequestedOrders");
             try
             {
-                IEnumerable<Order> orders = await _orderService.GetAllAsync();
+                List<OrderWithItems> orders = await _orderService.GetAllAsync();
                 _logger.LogInformation(eventId, "Orders requested at: {time}", DateTimeOffset.UtcNow);
                 if (orders == null || !orders.Any())
                 {
@@ -65,6 +66,7 @@ namespace StoreAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "client")]
         public async Task<IActionResult> Put(string id, [FromBody] List<OrderItem> orderItems)
         {
             var eventId = new EventId(0004, "UpdateOrder");
@@ -81,7 +83,8 @@ namespace StoreAPI.Controllers
             }
         }
 
-        [HttpPost("{id}/checkOut")]
+        [HttpPost("{id}/CheckOut")]
+        [Authorize(Roles = "client")]
         public async Task<IActionResult> CheckOut(string id, [FromBody] Order order)
         {
             var eventId = new EventId(0006, "CheckOutOrder");

@@ -12,14 +12,14 @@ namespace StorePresentation.Domain
         [Range(0, double.MaxValue, ErrorMessage = "El total debe ser mayor o igual a cero.")]
         public double Total { get; set; }
 
-        [DataType(DataType.Date)]
-        public DateTime Date { get; set; }
+        [Required(ErrorMessage = "Date is required")]
+        public string Date { get; set; }
 
         [Required(ErrorMessage = "El email es requerido.")]
         [EmailAddress(ErrorMessage = "El email ingresado no es válido.")]
         public string Email { get; set; }
 
-        public Order(string address, double total, DateTime date, string email)
+        public Order(string address, double total, string date, string email)
         {
             Address = address;
             Total = total;

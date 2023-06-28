@@ -65,10 +65,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await GetUpdatedOrder();
+        await GetUpdatedProducts();
     }
 
-    public async Task GetUpdatedOrder()
+    public async Task GetUpdatedProducts()
     {
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7143/Products?category={category}&orderBy={orderBy}");
         var response = await Http.SendAsync(requestMessage);

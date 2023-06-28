@@ -67,7 +67,7 @@
 </EditForm>
 
 @code {
-    private Order order = new Order("", 0, DateTime.Now, GlobalVariables.GetUserEmail());
+    private Order order = new Order("", 0, DateTime.Now.ToShortDateString(), GlobalVariables.GetUserEmail());
     private string notify = "";
     private List<OrderItem> products = new List<OrderItem>();
 
@@ -111,7 +111,7 @@
     {
         order.Total = products.Sum(p => p.Price * p.Quantity);
         Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
-        var response = await Http.PostAsJsonAsync("https://localhost:7143/Orders/" + GlobalVariables.GetUserEmail().Replace("@", "").Replace(".com", "") + "/checkOut", order);
+        var response = await Http.PostAsJsonAsync("https://localhost:7143/Orders/" + GlobalVariables.GetUserEmail().Replace("@", "").Replace(".com", "") + "/CheckOut", order);
         if (response.IsSuccessStatusCode)
         {
             order.Address = "";
