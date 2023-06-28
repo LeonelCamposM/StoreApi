@@ -5,12 +5,12 @@
 @using Newtonsoft.Json
 @inject IAccessTokenProvider TokenProvider
 
-<PageTitle>Ventas realizadas </PageTitle>
-<th>Notificación: @notify </th>
+<PageTitle>Ventas realizadas</PageTitle>
+<th>Notificación: @notify</th>
 
 <AuthorizeView>
     <Authorized>
-        <h2>Ventas realizadas </h2>
+        <h2>Ventas realizadas</h2>
         <br />
         <table class="table">
             <thead>
@@ -19,35 +19,70 @@
                     <th>Dirección</th>
                     <th>Correo</th>
                     <th>Total</th>
+                    <th>Acción</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var order in orders)
                 {
                     <tr>
-                        <th>@order.OrderInfo.Date</th>
+                        <td>@order.OrderInfo.Date</td>
                         <td>@order.OrderInfo.Address</td>
                         <td>@order.OrderInfo.Email</td>
                         <td>@order.OrderInfo.Total</td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="() => ToggleOrderItems(order)">Details</button>
+                        </td>
                     </tr>
-                    @foreach (var item in order.Items)
-                    {  
+                    <br />
+                    <br />
+                   
+                    @if (order.ShowOrderItems)
+                    {
+                  
                         <tr>
-                            <td>@item.Id</td>
-                            <td>@item.Name</td>
-                            <td>@item.Price</td>
+                        <div class="row">
+                            <div class="col-12">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Cantidad</th>
+                                            <th>Nombre</th>
+                                            <th>Precio unitario</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                            @foreach (var item in order.Items)
+                                            {
+                                            <tr>
+                                                <td>@item.Id</td>
+                                                <td>@item.Quantity</td>
+                                                <td>@item.Name</td>
+                                                <td>@item.Price</td>
+                                            </tr>
+                                            }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                         </tr>
+                    <br />
+                    <br />
                     }
+                
+
                 }
             </tbody>
         </table>
 
     </Authorized>
     <NotAuthorized>
-        <h2>Debe inciar sesión para consultar las ordenes </h2>
+        <h2>Debe iniciar sesión para consultar las órdenes</h2>
     </NotAuthorized>
 </AuthorizeView>
 
+   
 @code {
     private List<OrderWithItems> orders = new List<OrderWithItems>();
     private string category = "a";
@@ -55,6 +90,10 @@
     private string token_str = "";
     private string notify = "";
 
+    private void ToggleOrderItems(OrderWithItems order)
+    {
+        order.ShowOrderItems = !order.ShowOrderItems;
+    }
     private async Task ShowNotification(string message)
     {
         notify = message;
@@ -100,6 +139,7 @@
             Total = total;
             Date = date;
             Email = email;
+         
         }
 
         public Order()
@@ -109,6 +149,7 @@
             Total = 0;
             Date = "";
             Email = "";
+            
         }
     }
 
@@ -146,11 +187,13 @@
     {
         public Order OrderInfo { get; set; }
         public List<OrderItem> Items { get; set; }
+        public bool ShowOrderItems { get; set; }
 
         public OrderWithItems(Order order, List<OrderItem> items)
         {
             OrderInfo = order;
             Items = items;
+            ShowOrderItems = false;
         }
 
     }
