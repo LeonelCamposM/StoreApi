@@ -22,6 +22,7 @@
             <th>Precio unitario</th>
             <th>Cantidad</th>
             <th>Total</th>
+            <th>Acción</th>
         </tr>
     </thead>
     <tbody>
@@ -38,10 +39,12 @@
                     </form>
                 </td>
                 <td>₡@(product.Price * product.Quantity)</td>
+                <td><button class="btn btn-danger" @onclick="() => RemoveProduct(product)"> Quitar</button></td>
             </tr>
         }
         <tr>
             <td colspan="5"><strong>Total de la orden:</strong></td>
+            <td> </td>
             <td>₡@products.Sum(p => p.Price * p.Quantity)</td>
         </tr>
     </tbody>
@@ -73,6 +76,12 @@
         await GetUpdatedOrder();
     }
 
+    public async void  RemoveProduct(OrderItem product)
+    {
+        products.Remove(product);
+        await UpdateOrder();
+    }
+
     private async Task ShowNotification(string message)
     {
         notify = message;
@@ -100,6 +109,7 @@
 
     public async Task CheckOutOrder()
     {
+        order.Total = products.Sum(p => p.Price * p.Quantity);
         Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
         var response = await Http.PostAsJsonAsync("https://localhost:7143/Orders/" + GlobalVariables.GetUserEmail().Replace("@", "").Replace(".com", "") + "/checkOut", order);
         if (response.IsSuccessStatusCode)
