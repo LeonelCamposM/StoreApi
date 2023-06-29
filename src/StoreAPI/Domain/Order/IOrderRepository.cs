@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using StoreAPI.Domain.Order;
 
 public interface IOrderRepository
 {
 
-    Task<IEnumerable<Order>> GetAllAsync();
+    Task<List<OrderWithItems>> GetAllAsync();
     Task<List<OrderItem>> GetByIdAsync(string orderID);
     Task UpdateAsync(string orderID, List<OrderItem> orderItems);
     Task AddToOrderAsync(Product product, string orderID);

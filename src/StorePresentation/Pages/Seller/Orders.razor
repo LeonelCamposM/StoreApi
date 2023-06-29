@@ -1,95 +1,200 @@
 ﻿@inject HttpClient Http
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using System.Net.Http.Headers
+@using System.Text.Json
+@using Newtonsoft.Json
 @inject IAccessTokenProvider TokenProvider
 
-<PageTitle>Ventas realizadas </PageTitle>
+<PageTitle>Ventas realizadas</PageTitle>
+<th>Notificación: @notify</th>
 
 <AuthorizeView>
     <Authorized>
-
-        <h2>Ventas realizadas </h2>
-
+        <h2>Ventas realizadas</h2>
         <br />
         <table class="table">
             <thead>
                 <tr>
-                    <th>Imagen</th>
-                    <th>Nombre</th>
-                    <th>Precio</th>
-                    <th>Cantidad</th>
+                    <th>Fecha</th>
+                    <th>Dirección</th>
+                    <th>Correo</th>
                     <th>Total</th>
+                    <th>Acción</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var product in products)
+                @foreach (var order in orders)
                 {
                     <tr>
-                        <th>@product.Image</th>
-                        <td>@product.Name</td>
-                        <td>@product.Price</td>
+                        <td>@order.OrderInfo.Date</td>
+                        <td>@order.OrderInfo.Address</td>
+                        <td>@order.OrderInfo.Email</td>
+                        <td>@order.OrderInfo.Total</td>
                         <td>
-                            <form>
-                                <input type="number" id="cantidad" name="cantidad" min="1" max="100">
-                            </form>
+                            <button class="btn btn-primary" @onclick="() => ToggleOrderItems(order)">Details</button>
                         </td>
-                        <td>@product.Price*@product.Quantity</td>
                     </tr>
+                    <br />
+                    <br />
+                   
+                    @if (order.ShowOrderItems)
+                    {
+                  
+                        <tr>
+                        <div class="row">
+                            <div class="col-12">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Cantidad</th>
+                                            <th>Nombre</th>
+                                            <th>Precio unitario</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                            @foreach (var item in order.Items)
+                                            {
+                                            <tr>
+                                                <td>@item.Id</td>
+                                                <td>@item.Quantity</td>
+                                                <td>@item.Name</td>
+                                                <td>@item.Price</td>
+                                            </tr>
+                                            }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        </tr>
+                    <br />
+                    <br />
+                    }
+                
+
                 }
             </tbody>
         </table>
-        <button class="btn btn-primary" @onclick="checkOut">Realizar pago</button>
+
     </Authorized>
     <NotAuthorized>
-        <h2>Debe inciar sesión para consultar el carrito </h2>
+        <h2>Debe iniciar sesión para consultar las órdenes</h2>
     </NotAuthorized>
 </AuthorizeView>
 
+   
 @code {
-    private List<Product> products = new List<Product>();
+    private List<OrderWithItems> orders = new List<OrderWithItems>();
     private string category = "a";
     private string orderBy = "d";
     private string token_str = "";
+    private string notify = "";
+
+    private void ToggleOrderItems(OrderWithItems order)
+    {
+        order.ShowOrderItems = !order.ShowOrderItems;
+    }
+    private async Task ShowNotification(string message)
+    {
+        notify = message;
+        StateHasChanged();
+        await Task.Delay(3000);
+        notify = "";
+        StateHasChanged();
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7143/Products?category={category}&orderBy={orderBy}");
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+        await GetOrders();
+    }
+
+    private async Task GetOrders()
+    {
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7143/Orders");
         var response = await Http.SendAsync(requestMessage);
         if (response.IsSuccessStatusCode)
         {
-            products = await response.Content.ReadFromJsonAsync<List<Product>>();
+            string json = await response.Content.ReadAsStringAsync();
+            orders = JsonConvert.DeserializeObject<List<OrderWithItems>>(json);
+            await ShowNotification("Productos cargados.");
         }
         else
         {
-            var statusCode = (int)response.StatusCode;
+            await ShowNotification("Eror cargando productos.");
         }
     }
 
-    public void checkOut(){
+    public class Order
+    {
+        public string Address { get; set; }
+        public double Total { get; set; }
+        public string Date { get; set; }
+        public string Email { get; set; }
 
+        public Order(string address, double total, string date, string email)
+        {
+
+            Address = address;
+            Total = total;
+            Date = date;
+            Email = email;
+         
+        }
+
+        public Order()
+        {
+
+            Address = "";
+            Total = 0;
+            Date = "";
+            Email = "";
+            
+        }
     }
 
-    public class Product
+    public class OrderItem
     {
+        public string Id { get; set; }
         public string Name { get; set; }
         public double Price { get; set; }
-        public double Stock { get; set; }
         public string Image { get; set; }
-        public string Description { get; set; }
-        public string Category { get; set; }
-        public int Quantity { get; set; }
+        public double Quantity { get; set; }
 
-        public Product(string name, double price, double stock, string image, string description, string category)
+
+        public OrderItem(string id, string name, double price, string image, double quantity)
         {
+            Id = id;
             Name = name;
             Price = price;
-            Stock = stock;
             Image = image;
-            Description = description;
-            Category = category;
+            Quantity = quantity;
+        }
+    
+
+        public OrderItem()
+        {
+            Id = "";
+            Name = "";
+            Price = 0;
+            Image = "";
             Quantity = 0;
         }
     }
 
+    
+    public class OrderWithItems
+    {
+        public Order OrderInfo { get; set; }
+        public List<OrderItem> Items { get; set; }
+        public bool ShowOrderItems { get; set; }
+
+        public OrderWithItems(Order order, List<OrderItem> items)
+        {
+            OrderInfo = order;
+            Items = items;
+            ShowOrderItems = false;
+        }
+
+    }
 }

@@ -1,6 +1,7 @@
 ﻿using Google.Api.Gax.ResourceNames;
 using Google.Cloud.Firestore;
 using Microsoft.AspNetCore.Mvc;
+using StoreAPI.Domain.Order;
 
 public class OrderRepository : IOrderRepository
 {
@@ -49,16 +50,19 @@ public class OrderRepository : IOrderRepository
 
     }
 
-    public async Task<IEnumerable<Order>> GetAllAsync()
+    public async Task<List<OrderWithItems>> GetAllAsync()
     {
-        var userOrder = _firestoreDb.Collection("Orders");
-        QuerySnapshot snapshot = await userOrder.GetSnapshotAsync();
-        List<Order> orders = new List<Order>();
+        var processedOrders = _firestoreDb.Collection("ProcessedOrders");
+        QuerySnapshot snapshot = await processedOrders.GetSnapshotAsync();
+        List<OrderWithItems> orders = new List<OrderWithItems>();
         foreach (DocumentSnapshot documentSnapshot in snapshot.Documents)
         {
-            //List<OrderItem> items = await GetOrderItemsAsync(documentSnapshot.Id);
+            Query query = _firestoreDb.Collection("ProcessedOrders").Document(documentSnapshot.Id).Collection("items");
+            QuerySnapshot snapshot2 = await query.GetSnapshotAsync();
+            List<OrderItem> products = snapshot2.Documents.Select(document => document.ConvertTo<OrderItem>()).ToList();
             Order order = documentSnapshot.ConvertTo<Order>();
-            orders.Add(order);
+            OrderWithItems orderWithItems = new OrderWithItems(order, products);
+            orders.Add(orderWithItems);
         }
 
         return orders;

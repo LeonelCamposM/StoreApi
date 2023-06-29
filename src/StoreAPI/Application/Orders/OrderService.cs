@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using StoreAPI.Domain.Order;
 
 public class OrderService : IOrderService
 {
@@ -19,7 +20,7 @@ public class OrderService : IOrderService
         await _orderRepository.CheckOut(order, orderID);
     }
 
-    public async Task<IEnumerable<Order>> GetAllAsync()
+    public async Task<List<OrderWithItems>> GetAllAsync()
     {
         return await _orderRepository.GetAllAsync();
     }
