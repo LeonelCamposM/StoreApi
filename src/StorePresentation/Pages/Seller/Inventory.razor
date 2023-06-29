@@ -1,5 +1,114 @@
-﻿<h3>Inventory</h3>
+﻿@page "/Inventory"
+
+@inject HttpClient Http
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using System.Net.Http.Headers
+@using System.Text.Json
+@using Newtonsoft.Json
+@inject IAccessTokenProvider TokenProvider
+
+<PageTitle>Ventas realizadas</PageTitle>
+<th>Notificación: @notify</th>
+
+<AuthorizeView>
+    <Authorized>
+        <h2>Productos disponibles</h2>
+        <br />
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Precio unitario</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in products)
+                {
+                    <tr>
+                        <td>@product.Image</td>
+                        <td>@product.Name</td>
+                        <td>@product.Description</td>
+                        <td>₡@product.Price</td>
+                        <td>
+                            <button class="btn btn-outline-primary"> Editar </button>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger"> Eliminar </button>
+                        </td>
+                    </tr>
+                }
+                <br />
+                <tr>
+                    <button class="btn btn-primary">Agregar</button>
+                </tr>
+            </tbody>
+        </table>
+    </Authorized>
+    <NotAuthorized>
+        <h2>Debe iniciar sesión para consultar los productos</h2>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
+    private string token_str = "";
+    private string notify = "";
+    private string category = "a";
+    private string orderBy = "d";
+    private List<Product> products = new List<Product>();
 
+    private async Task ShowNotification(string message)
+    {
+        notify = message;
+        StateHasChanged();
+        await Task.Delay(3000);
+        notify = "";
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetProducts();
+    }
+
+    private async Task GetProducts()
+    {
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7143/Products?category={category}&orderBy={orderBy}");
+        var response = await Http.SendAsync(requestMessage);
+        if (response.IsSuccessStatusCode)
+        {
+            string json = await response.Content.ReadAsStringAsync();
+            products = JsonConvert.DeserializeObject<List<Product>>(json);
+            await ShowNotification("Productos cargados.");
+        }
+        else
+        {
+            await ShowNotification("Error cargando productos.");
+        }
+    }
+
+    public class Product
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public double Price { get; set; }
+        public double Stock { get; set; }
+        public string Image { get; set; }
+        public string Description { get; set; }
+        public string Category { get; set; }
+
+        public Product(string id, string name, double price, double stock, string image, string description, string category)
+        {
+            Id = id;
+            Name = name;
+            Price = price;
+            Stock = stock;
+            Image = image;
+            Description = description;
+            Category = category;
+        }
+    }
 }
