@@ -1,0 +1,161 @@
+﻿@page "/product-details"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using System.Net.Http.Headers
+@using StorePresentation.Domain
+@using Microsoft.AspNetCore.Components.Forms
+@using System.ComponentModel.DataAnnotations
+@using System.Text.Json
+
+
+<PageTitle>Agregar producto</PageTitle>
+
+@if (string.IsNullOrEmpty(product.Id))
+{
+    <h2>Agregar producto</h2>
+}
+else
+{
+    <h2>Modificar producto</h2>
+}
+
+<th>Notificación: @notify</th>
+<br />
+
+<EditForm Model="@product" OnValidSubmit="OnSaveProduct">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="name">Name:</label>
+        <InputText id="name" class="form-control" @bind-Value="product.Name" />
+        <div class="text-danger">
+            <ValidationMessage For="@(() => product.Name)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="price">Price:</label>
+        <InputNumber id="price" class="form-control" @bind-Value="product.Price" />
+        <ValidationMessage For="@(() => product.Price)" />
+    </div>
+
+    <div class="form-group">
+        <label for="stock">Stock:</label>
+        <InputNumber id="stock" class="form-control" @bind-Value="product.Stock" />
+        <ValidationMessage For="@(() => product.Stock)" />
+    </div>
+
+    <div class="form-group">
+        <label for="image">Image:</label>
+        <InputText id="image" class="form-control" @bind-Value="product.Image" />
+        <ValidationMessage For="@(() => product.Image)" />
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description:</label>
+        <InputText id="description" class="form-control" @bind-Value="product.Description" />
+        <ValidationMessage For="@(() => product.Description)" />
+    </div>
+
+    <div class="form-group">
+        <label for="category">Category:</label>
+        <InputText id="category" class="form-control" @bind-Value="product.Category" />
+        <ValidationMessage For="@(() => product.Category)" />
+    </div>
+    <br />
+    <button type="button" class="btn btn-primary" @onclick="OnSaveProduct">
+        @if (string.IsNullOrEmpty(product.Id))
+        {
+            <span>Agregar producto</span>
+        }
+        else
+        {
+            <span>Guardar cambios</span>
+        }
+    </button>
+</EditForm>
+@code {
+
+    private string notify = "";
+    private Product product = new Product("", "", 0, 0, "", "", "");
+    private bool isEditing;
+
+    private async Task ShowNotification(string message)
+    {
+        notify = message;
+        StateHasChanged();
+        await Task.Delay(3000);
+        notify = "";
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = new Uri(NavigationManager.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var productId = query.Get("id");
+
+        if (!string.IsNullOrEmpty(productId))
+        {
+            await GetProduct(productId);
+            isEditing = true;
+        }
+        else
+        {
+            isEditing = false;
+        }
+    }
+    
+    private async Task GetProduct(string productId)
+    {
+        var response = await Http.GetAsync($"https://localhost:7143/Products/{productId}");
+        if (response.IsSuccessStatusCode)
+        {
+            var json = await response.Content.ReadAsStringAsync();
+            product = JsonSerializer.Deserialize<Product>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                await ShowNotification("Producto cargado.");    
+        }
+        else
+        {
+            await ShowNotification("Error cargando el producto.");
+        }
+    }
+
+    private async Task OnSaveProduct()
+    {
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
+
+        if (string.IsNullOrEmpty(product.Id))
+        {
+            // Adding a new product
+            var response = await Http.PostAsJsonAsync("https://localhost:7143/Products/", product);
+            if (response.IsSuccessStatusCode)
+            {
+                await ShowNotification("Producto agregado");
+                await Task.Delay(1000);
+                NavigationManager.NavigateTo("/Inventory");
+            }
+            else
+            {
+                await ShowNotification("Error agregando el producto");
+            }
+        }
+        else
+        {
+            // Editing an existing product
+            var response = await Http.PutAsJsonAsync($"https://localhost:7143/Products/{product.Id}", product);
+            if (response.IsSuccessStatusCode)
+            {
+                await ShowNotification("Producto actualizado");
+                await Task.Delay(1000);
+                NavigationManager.NavigateTo("/Inventory");
+            }
+            else
+            {
+                await ShowNotification("Error actualizando el producto");
+            }
+        }
+    }
+}

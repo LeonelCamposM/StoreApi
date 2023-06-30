@@ -1,6 +1,7 @@
 ﻿@page "/Inventory"
 
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using System.Net.Http.Headers
 @using System.Text.Json
@@ -33,16 +34,17 @@
                         <td>@product.Description</td>
                         <td>₡@product.Price</td>
                         <td>
-                            <button class="btn btn-outline-primary"> Editar </button>
+                            <button class="btn btn-outline-primary" @onclick="() => Edit(product)"> Editar </button>
                         </td>
                         <td>
                             <button class="btn btn-outline-danger" @onclick="() => Delete(product)"> Eliminar </button>
                         </td>
                     </tr>
                 }
-                <br />
                 <tr>
-                    <button class="btn btn-primary">Agregar</button>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => Add()">Agregar</button>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -71,6 +73,16 @@
     protected override async Task OnInitializedAsync()
     {
         await GetProducts();
+    }
+
+    private void Add()
+    {
+        NavigationManager.NavigateTo("/product-details");
+    }
+
+    private void Edit(Product product)
+    {
+        NavigationManager.NavigateTo($"/product-details?id={product.Id}");
     }
 
     private async Task GetProducts()
