@@ -10,6 +10,19 @@
 <br />
 <h2>Productos disponibles</h2>
 <br />
+
+<div>
+    <label for="categoryFilter">Filtrar por categoría:</label>
+    <select id="categoryFilter" @bind="category">
+        <option value="all">Mostrar todos</option> <!-- Added default option -->
+        @foreach (var categoryOption in categories)
+        {
+            <option value="@categoryOption">@categoryOption</option>
+        }
+    </select>
+    <button class="btn btn-primary" @onclick="FilterProducts">Filtrar</button>
+</div>
+
 <table class="table">
     <thead>
         <tr>
@@ -49,10 +62,26 @@
 
 @code {
     private List<Product> products = new List<Product>();
-    private string category = "a";
+    private string category = "all";
     private string orderBy = "a";
     private string token_str = "";
     private string notify = "";
+    private List<string> categories = new List<string>();
+
+    private async Task FilterProducts()
+    {
+        // Reset the products list before filtering
+        products = new List<Product>();
+
+        if (category == "all")
+        {
+            await GetUpdatedProducts();
+        }
+        else
+        {
+            await GetFilteredProducts(category);
+        }
+    }
 
     private async Task ShowNotification(string message)
     {
@@ -66,6 +95,22 @@
     protected override async Task OnInitializedAsync()
     {
         await GetUpdatedProducts();
+        await ShowNotification("Productos filtrados");
+    }
+
+    public async Task GetFilteredProducts(string category)
+    {
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7143/Products?category={category}&orderBy={orderBy}");
+        var response = await Http.SendAsync(requestMessage);
+        if (response.IsSuccessStatusCode)
+        {
+            products = await response.Content.ReadFromJsonAsync<List<Product>>();
+            await ShowNotification("Productos cargados.");
+        }
+        else
+        {
+            await ShowNotification("Error cargando productos.");
+        }
     }
 
     public async Task GetUpdatedProducts()
@@ -75,6 +120,8 @@
         if (response.IsSuccessStatusCode)
         {
             products = await response.Content.ReadFromJsonAsync<List<Product>>();
+            // Extract categories from products
+            categories = products.Select(p => p.Category).Distinct().ToList();
             await ShowNotification("Productos cargados.");
         }
         else
