@@ -70,6 +70,32 @@ public class ProductRepository : IProductRepository
             products.Add(product);
         }
 
+        if (!string.IsNullOrEmpty(orderBy))
+        {
+            products = OrderProducts(products, orderBy);
+        }
+
+        return products;
+    }
+
+    private List<Product> OrderProducts(List<Product> products, string orderBy)
+    {
+        switch (orderBy)
+        {
+            case "Price":
+                products = products.OrderBy(p => p.Price).ToList();
+                break;
+            case "Name":
+                products = products.OrderBy(p => p.Name).ToList();
+                break;
+            case "Description":
+                products = products.OrderBy(p => p.Description).ToList();
+                break;
+            case "Image":
+                products = products.OrderBy(p => p.Image).ToList();
+                break;
+        }
+
         return products;
     }
 

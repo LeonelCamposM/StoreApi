@@ -11,16 +11,27 @@
 <h2>Productos disponibles</h2>
 <br />
 
-<div>
+<div style="display: inline-block;">
     <label for="categoryFilter">Filtrar por categoría:</label>
     <select id="categoryFilter" @bind="category">
-        <option value="all">Mostrar todos</option> <!-- Added default option -->
+        <option value="all">Mostrar todos</option>
         @foreach (var categoryOption in categories)
         {
             <option value="@categoryOption">@categoryOption</option>
         }
     </select>
     <button class="btn btn-primary" @onclick="FilterProducts">Filtrar</button>
+</div>
+
+<div style="display: inline-block;">
+    <label for="orderByFilter">Ordenar por campo:</label>
+    <select id="orderByFilter" @bind="orderBy">
+        <option value="Name">Nombre</option> 
+        <option value="Price">Precio</option>
+        <option value="Image">Imagen</option>
+        <option value="Description">Descripción</option>
+    </select>
+    <button class="btn btn-primary" @onclick="FilterProducts">Ordenar</button>
 </div>
 
 <table class="table">
@@ -49,7 +60,7 @@
                             <button class="btn btn-primary" @onclick="(() => AddToCart(product))">Agregar al carrito</button>
                         </Authorized>
                         <NotAuthorized>
-                            <button disabled class="btn btn-secondary">Agrear al carrito</button>
+                            <button disabled class="btn btn-secondary">Agrgear al carrito</button>
                         </NotAuthorized>
                     </AuthorizeView>
                 </td>
@@ -63,7 +74,7 @@
 @code {
     private List<Product> products = new List<Product>();
     private string category = "all";
-    private string orderBy = "a";
+    private string orderBy = "Price";
     private string token_str = "";
     private string notify = "";
     private List<string> categories = new List<string>();
