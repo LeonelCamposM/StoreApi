@@ -22,7 +22,8 @@
                     <th>Nombre</th>
                     <th>Descripción</th>
                     <th>Precio unitario</th>
-                    <th>Acción</th>
+                    <th></th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -34,19 +35,16 @@
                         <td>@product.Description</td>
                         <td>₡@product.Price</td>
                         <td>
-                            <button class="btn btn-outline-primary" @onclick="() => Edit(product)"> Editar </button>
+                            <button class="btn btn-primary" @onclick="() => Edit(product)"> Editar </button>
                         </td>
                         <td>
-                            <button class="btn btn-outline-danger" @onclick="() => Delete(product)"> Eliminar </button>
+                            <button class="btn btn-danger" @onclick="() => Delete(product)"> Eliminar </button>
                         </td>
                     </tr>
                 }
-                <tr>
-                    <td>
-                        <button class="btn btn-primary" @onclick="() => Add()">Agregar</button>
-                    </td>
-                </tr>
             </tbody>
+            <br />
+            <button class="btn btn-primary" @onclick="() => Add()">Agregar</button>
         </table>
     </Authorized>
     <NotAuthorized>

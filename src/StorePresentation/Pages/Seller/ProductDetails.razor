@@ -65,7 +65,7 @@ else
         <ValidationMessage For="@(() => product.Category)" />
     </div>
     <br />
-    <button type="button" class="btn btn-primary" @onclick="OnSaveProduct">
+    <button type="submit" class="btn btn-primary" @onclick="OnSaveProduct">
         @if (string.IsNullOrEmpty(product.Id))
         {
             <span>Agregar producto</span>

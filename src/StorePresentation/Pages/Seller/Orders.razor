@@ -19,7 +19,7 @@
                     <th>Dirección</th>
                     <th>Correo</th>
                     <th>Total</th>
-                    <th>Acción</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -29,9 +29,9 @@
                         <td>@order.OrderInfo.Date</td>
                         <td>@order.OrderInfo.Address</td>
                         <td>@order.OrderInfo.Email</td>
-                        <td>@order.OrderInfo.Total</td>
+                        <td>₡ @order.OrderInfo.Total</td>
                         <td>
-                            <button class="btn btn-primary" @onclick="() => ToggleOrderItems(order)">Details</button>
+                            <button class="btn btn-primary" @onclick="() => ToggleOrderItems(order)">Detalles</button>
                         </td>
                     </tr>
                     <br />
@@ -59,7 +59,7 @@
                                                 <td>@item.Id</td>
                                                 <td>@item.Quantity</td>
                                                 <td>@item.Name</td>
-                                                <td>@item.Price</td>
+                                                <td>₡ @item.Price</td>
                                             </tr>
                                             }
                                     </tbody>

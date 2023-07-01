@@ -17,7 +17,7 @@
             <th>Nombre</th>
             <th>Descripción</th>
             <th>Precio unitario</th>
-            <th>Acción</th>
+            <th></th>
 
         </tr>
     </thead>
@@ -33,7 +33,7 @@
                 <td>
                     <AuthorizeView>
                         <Authorized>
-                            <button class="btn btn-primary" @onclick="(() => AddToCart(product))">Agrear al carrito</button>
+                            <button class="btn btn-primary" @onclick="(() => AddToCart(product))">Agregar al carrito</button>
                         </Authorized>
                         <NotAuthorized>
                             <button disabled class="btn btn-secondary">Agrear al carrito</button>

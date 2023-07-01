@@ -22,7 +22,7 @@
             <th>Precio unitario</th>
             <th>Cantidad</th>
             <th>Total</th>
-            <th>Acción</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -43,9 +43,8 @@
             </tr>
         }
         <tr>
-            <td colspan="5"><strong>Total de la orden:</strong></td>
-            <td> </td>
-            <td>₡@products.Sum(p => p.Price * p.Quantity)</td>
+            <td><strong>Total de la orden:</strong></td>
+            <td> ₡@products.Sum(p => p.Price * p.Quantity) </td>
         </tr>
     </tbody>
 </table>
@@ -110,6 +109,7 @@
     public async Task CheckOutOrder()
     {
         order.Total = products.Sum(p => p.Price * p.Quantity);
+        await UpdateOrder();
         Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
         var response = await Http.PostAsJsonAsync("https://localhost:7143/Orders/" + GlobalVariables.GetUserEmail().Replace("@", "").Replace(".com", "") + "/CheckOut", order);
         if (response.IsSuccessStatusCode)

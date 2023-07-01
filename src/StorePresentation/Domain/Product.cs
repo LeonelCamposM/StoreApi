@@ -6,23 +6,23 @@ namespace StorePresentation.Domain
     {
         public string Id { get; set; }
 
-        [Required(ErrorMessage = "Name is required")]
+        [Required(ErrorMessage = "El campo Nombre es obligatorio")]
         public string Name { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "Price must be a positive value")]
+        [Range(0, double.MaxValue, ErrorMessage = "El precio debe ser un valor positivo")]
         public double Price { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "Stock must be a positive value")]
+        [Range(0, double.MaxValue, ErrorMessage = "El stock debe ser un valor positivo")]
         public double Stock { get; set; }
 
-        [Required(ErrorMessage = "Image URL is required")]
-        [Url(ErrorMessage = "Image must be a valid URL")]
+        [Required(ErrorMessage = "La URL de la imagen es obligatoria")]
+        [Url(ErrorMessage = "La imagen debe ser una URL válida")]
         public string Image { get; set; }
-        
-        [Required(ErrorMessage = "Description is required")]
+
+        [Required(ErrorMessage = "La descripción es obligatoria")]
         public string Description { get; set; }
 
-        [Required(ErrorMessage = "Category is required")]
+        [Required(ErrorMessage = "La categoría es obligatoria")]
         public string Category { get; set; }
 
         public Product(string id, string name, double price, double stock, string image, string description, string category)
