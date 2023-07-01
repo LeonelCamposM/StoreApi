@@ -55,22 +55,11 @@ public class ProductRepository : IProductRepository
     public async Task<IEnumerable<Product>> GetAllAsync(string category, string orderBy)
     {
         Query query = _firestoreDb.Collection("Products");
-        //if (category == "" && orderBy != "")
-        //{
-        //    query = _firestoreDb.Collection("Products")
-        //    .OrderBy(orderBy);
-        //}
-        //if (category != "" && orderBy == "")
-        //{
-        //    query = _firestoreDb.Collection("Products")
-        //    .WhereEqualTo("Category", category);
-        //}
-        //if (category != "" && orderBy != "")
-        //{
-        //    query = _firestoreDb.Collection("Products")
-        //    .WhereEqualTo("Category", category)
-        //    .OrderBy(orderBy);
-        //}
+        Console.WriteLine(category);
+        if (!string.IsNullOrEmpty(category) && category != "all")
+        {
+            query = query.WhereEqualTo("Category", category);
+        }
 
         QuerySnapshot snapshot = await query.GetSnapshotAsync();
         List<Product> products = new List<Product>();
