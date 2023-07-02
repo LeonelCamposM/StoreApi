@@ -71,6 +71,7 @@
     private Order order = new Order("", 0, DateTime.Now.ToShortDateString(), GlobalVariables.GetUserEmail());
     private string notify = "";
     private List<OrderItem> products = new List<OrderItem>();
+    bool validOrder = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -111,19 +112,24 @@
     public async Task CheckOutOrder()
     {
         order.Total = products.Sum(p => p.Price * p.Quantity);
+        validOrder = false;
         await UpdateOrder();
-        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
-        var response = await Http.PostAsJsonAsync("https://localhost:7143/Orders/" + GlobalVariables.GetUserEmail().Replace("@", "").Replace(".com", "") + "/CheckOut", order);
-        if (response.IsSuccessStatusCode)
-        {
-            order.Address = "";
-        }
-        else
-        {
+        if (validOrder) {
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
+            var response = await Http.PostAsJsonAsync("https://localhost:7143/Orders/" + GlobalVariables.GetUserEmail().Replace("@", "").Replace(".com", "") + "/CheckOut", order);
+            if (response.IsSuccessStatusCode)
+            {
+                order.Address = "";
+            }
+            else
+            {
+                await ShowNotification("Error completando la orden.");
+            }
+            await GetUpdatedOrder();
+            await ShowNotification("Orden completada.");
+        }else{
             await ShowNotification("Error completando la orden.");
         }
-        await GetUpdatedOrder();
-        await ShowNotification("Orden completada.");
     }
 
     public async Task UpdateOrder()
@@ -132,11 +138,13 @@
         var response = await Http.PutAsJsonAsync("https://localhost:7143/Orders/" + GlobalVariables.GetUserEmail().Replace("@", "").Replace(".com", ""), products);
         if (response.IsSuccessStatusCode)
         {
+            validOrder = true;
             await ShowNotification("Orden actualizada.");
         }
         else
         {
             var responseContent = await response.Content.ReadAsStringAsync();
+            validOrder = false;
             await ShowNotification($"{responseContent}");
         }
 
