@@ -129,6 +129,9 @@ public class ProductRepository : IProductRepository
         existingProduct.Name = product.Name;
         existingProduct.Description = product.Description;
         existingProduct.Price = product.Price;
+        existingProduct.Stock = product.Stock;
+        existingProduct.Image = product.Image;
+        existingProduct.Category = product.Category;
 
         // Update the product in the Firestore database
         DocumentReference documentRef = _firestoreDb.Collection("Products").Document(id);

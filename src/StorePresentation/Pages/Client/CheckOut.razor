@@ -1,11 +1,13 @@
 ﻿@page "/cart"
 @inject HttpClient Http
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using System.Net.Http.Headers
 @using System.ComponentModel.DataAnnotations
 @using StorePresentation.Domain
 
 <PageTitle>Checkout</PageTitle>
+@attribute [Authorize(Roles = "client")]
 
 <h2>Checkout</h2>
 
@@ -56,7 +58,7 @@
     <ValidationSummary />
 
     <div class="form-group">
-        <label for="address">Address:</label>
+        <label for="address">Dirección:</label>
         <InputText id="address" class="form-control" @bind-Value="order.Address" />
         <ValidationMessage For="@(() => order.Address)" />
     </div>

@@ -24,7 +24,7 @@
 </div>
 
 <div style="display: inline-block;">
-    <label for="orderByFilter">Ordenar por campo:</label>
+    <label for="orderByFilter">Ordenar por:</label>
     <select id="orderByFilter" @bind="orderBy">
         <option value="Name">Nombre</option> 
         <option value="Price">Precio</option>
@@ -60,7 +60,7 @@
                             <button class="btn btn-primary" @onclick="(() => AddToCart(product))">Agregar al carrito</button>
                         </Authorized>
                         <NotAuthorized>
-                            <button disabled class="btn btn-secondary">Agrgear al carrito</button>
+                            <button disabled class="btn btn-secondary">Agregar al carrito</button>
                         </NotAuthorized>
                     </AuthorizeView>
                 </td>
