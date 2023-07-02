@@ -6,10 +6,12 @@ using StoreAPI.Domain.Order;
 public class OrderRepository : IOrderRepository
 {
     private readonly FirestoreDb _firestoreDb;
+    private readonly IProductRepository _productRepository;
 
-    public OrderRepository(FirestoreDb firebaseClient)
+    public OrderRepository(FirestoreDb firebaseClient, IProductRepository productRepository)
     {
         _firestoreDb = firebaseClient;
+        _productRepository = productRepository;
     }
 
     public async Task AddToOrderAsync(Product product, string orderID)
@@ -33,13 +35,20 @@ public class OrderRepository : IOrderRepository
 
     public async Task CheckOut(Order order, string orderID)
     {
-        var userOrder = _firestoreDb.Collection("ProcessedOrders").Document();
-        await userOrder.SetAsync(order);
         List<OrderItem> orderItems = await GetByIdAsync(orderID);
         var orderItemsCollection = _firestoreDb.Collection("Orders").Document(orderID).Collection("items");
+        var userOrder = _firestoreDb.Collection("ProcessedOrders").Document();
+        await userOrder.SetAsync(order);
         foreach (OrderItem item in orderItems)
         {
-            await userOrder.Collection("items").AddAsync(item);
+            Product existingProduct = await _productRepository.GetByidAsync(item.Id);
+            double updatedStock = existingProduct.Stock - item.Quantity;
+            if(updatedStock >= 0)
+            {
+                existingProduct.Stock = updatedStock;
+                await _productRepository.UpdateAsync(existingProduct.Id, existingProduct);
+                await userOrder.Collection("items").AddAsync(item);
+            }
         }
 
         QuerySnapshot existingItemsSnapshot = await orderItemsCollection.GetSnapshotAsync();
