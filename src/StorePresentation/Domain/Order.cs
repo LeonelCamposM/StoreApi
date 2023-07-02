@@ -13,7 +13,7 @@ namespace StorePresentation.Domain
         public double Total { get; set; }
 
         [Required(ErrorMessage = "Fecha es requerida")]
-        public DateTime Date { get; set; }
+        public string Date { get; set; }
 
         [Required(ErrorMessage = "El email es requerido.")]
         [EmailAddress(ErrorMessage = "El email ingresado no es válido.")]
