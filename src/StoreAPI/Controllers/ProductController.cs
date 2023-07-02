@@ -62,6 +62,7 @@ namespace StoreAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Get(string id)
         {
             var eventId = new EventId(0003, "GetProductByID");

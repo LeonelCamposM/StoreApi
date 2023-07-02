@@ -79,7 +79,7 @@ namespace StoreAPI.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(eventId, ex, "An error occurred while updating order with ID {id}", id);
-                return StatusCode((int)HttpStatusCode.InternalServerError, "Not implemented endpoint");
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
 

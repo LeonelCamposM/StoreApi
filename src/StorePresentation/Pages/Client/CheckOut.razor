@@ -1,11 +1,13 @@
 ﻿@page "/cart"
 @inject HttpClient Http
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using System.Net.Http.Headers
 @using System.ComponentModel.DataAnnotations
 @using StorePresentation.Domain
 
 <PageTitle>Checkout</PageTitle>
+@attribute [Authorize(Roles = "client")]
 
 <h2>Checkout</h2>
 
@@ -22,7 +24,7 @@
             <th>Precio unitario</th>
             <th>Cantidad</th>
             <th>Total</th>
-            <th>Acción</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -43,9 +45,8 @@
             </tr>
         }
         <tr>
-            <td colspan="5"><strong>Total de la orden:</strong></td>
-            <td> </td>
-            <td>₡@products.Sum(p => p.Price * p.Quantity)</td>
+            <td><strong>Total de la orden:</strong></td>
+            <td> ₡@products.Sum(p => p.Price * p.Quantity) </td>
         </tr>
     </tbody>
 </table>
@@ -57,7 +58,7 @@
     <ValidationSummary />
 
     <div class="form-group">
-        <label for="address">Address:</label>
+        <label for="address">Dirección:</label>
         <InputText id="address" class="form-control" @bind-Value="order.Address" />
         <ValidationMessage For="@(() => order.Address)" />
     </div>
@@ -110,6 +111,7 @@
     public async Task CheckOutOrder()
     {
         order.Total = products.Sum(p => p.Price * p.Quantity);
+        await UpdateOrder();
         Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
         var response = await Http.PostAsJsonAsync("https://localhost:7143/Orders/" + GlobalVariables.GetUserEmail().Replace("@", "").Replace(".com", "") + "/CheckOut", order);
         if (response.IsSuccessStatusCode)
@@ -135,8 +137,7 @@
         else
         {
             var responseContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Response Content: {responseContent}");
-            await ShowNotification("Error al actualizar la orden.");
+            await ShowNotification($"{responseContent}");
         }
 
     }

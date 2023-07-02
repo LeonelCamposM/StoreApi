@@ -1,5 +1,122 @@
-﻿<h3>Inventory</h3>
+﻿@page "/Inventory"
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using System.Net.Http.Headers
+@using System.Text.Json
+@using Newtonsoft.Json
+@using StorePresentation.Domain
+@inject IAccessTokenProvider TokenProvider
+@attribute [Authorize(Roles = "admin")]
+
+<PageTitle>Ventas realizadas</PageTitle>
+<th>Notificación: @notify</th>
+
+<AuthorizeView>
+    <Authorized>
+        <h2>Productos disponibles</h2>
+        <br />
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Precio unitario</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in products)
+                {
+                    <tr>
+                        <td>@product.Image</td>
+                        <td>@product.Name</td>
+                        <td>@product.Description</td>
+                        <td>₡@product.Price</td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="() => Edit(product)"> Editar </button>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger" @onclick="() => Delete(product)"> Eliminar </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <br />
+            <button class="btn btn-primary" @onclick="() => Add()">Agregar</button>
+        </table>
+    </Authorized>
+    <NotAuthorized>
+        <h2>Debe iniciar sesión para consultar los productos</h2>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
+    private string token_str = "";
+    private string notify = "";
+    private string category = "all";
+    private string orderBy = "Name";
+    private List<Product> products = new List<Product>();
 
+    private async Task ShowNotification(string message)
+    {
+        notify = message;
+        StateHasChanged();
+        await Task.Delay(3000);
+        notify = "";
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetProducts();
+    }
+
+    private void Add()
+    {
+        NavigationManager.NavigateTo("/product-details");
+    }
+
+    private void Edit(Product product)
+    {
+        NavigationManager.NavigateTo($"/product-details?id={product.Id}");
+    }
+
+    private async Task GetProducts()
+    {
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7143/Products?category={category}&orderBy={orderBy}");
+        var response = await Http.SendAsync(requestMessage);
+        if (response.IsSuccessStatusCode)
+        {
+            string json = await response.Content.ReadAsStringAsync();
+            products = JsonConvert.DeserializeObject<List<Product>>(json);
+            await ShowNotification("Productos cargados.");
+        }
+        else
+        {
+            await ShowNotification("Error cargando productos.");
+        }
+    }
+
+    private async Task Delete(Product product)
+    {
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GlobalVariables.GetUserToken());
+        var response = await Http.DeleteAsync("https://localhost:7143/Products/" + product.Id);
+        if (response.IsSuccessStatusCode)
+        {
+            await ShowNotification("Producto eliminado.");
+        }
+        else
+        {
+            var statusCode = (int)response.StatusCode;
+            await ShowNotification("Error eliminando producto.");
+        }
+        await GetProducts();
+        await ShowNotification("Productos actualizados");
+    }
 }

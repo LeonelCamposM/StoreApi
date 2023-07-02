@@ -1,9 +1,12 @@
 ﻿@inject HttpClient Http
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using System.Net.Http.Headers
 @using System.Text.Json
 @using Newtonsoft.Json
+@using StorePresentation.Domain
 @inject IAccessTokenProvider TokenProvider
+@attribute [Authorize(Roles = "admin")]
 
 <PageTitle>Ventas realizadas</PageTitle>
 <th>Notificación: @notify</th>
@@ -19,7 +22,7 @@
                     <th>Dirección</th>
                     <th>Correo</th>
                     <th>Total</th>
-                    <th>Acción</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -29,9 +32,9 @@
                         <td>@order.OrderInfo.Date</td>
                         <td>@order.OrderInfo.Address</td>
                         <td>@order.OrderInfo.Email</td>
-                        <td>@order.OrderInfo.Total</td>
+                        <td>₡ @order.OrderInfo.Total</td>
                         <td>
-                            <button class="btn btn-primary" @onclick="() => ToggleOrderItems(order)">Details</button>
+                            <button class="btn btn-primary" @onclick="() => ToggleOrderItems(order)">Detalles</button>
                         </td>
                     </tr>
                     <br />
@@ -59,7 +62,7 @@
                                                 <td>@item.Id</td>
                                                 <td>@item.Quantity</td>
                                                 <td>@item.Name</td>
-                                                <td>@item.Price</td>
+                                                <td>₡ @item.Price</td>
                                             </tr>
                                             }
                                     </tbody>
@@ -117,84 +120,11 @@
         {
             string json = await response.Content.ReadAsStringAsync();
             orders = JsonConvert.DeserializeObject<List<OrderWithItems>>(json);
-            await ShowNotification("Productos cargados.");
+            await ShowNotification("Ordenes cargadas.");
         }
         else
         {
-            await ShowNotification("Eror cargando productos.");
+            await ShowNotification("Error cargando ordenes.");
         }
-    }
-
-    public class Order
-    {
-        public string Address { get; set; }
-        public double Total { get; set; }
-        public string Date { get; set; }
-        public string Email { get; set; }
-
-        public Order(string address, double total, string date, string email)
-        {
-
-            Address = address;
-            Total = total;
-            Date = date;
-            Email = email;
-         
-        }
-
-        public Order()
-        {
-
-            Address = "";
-            Total = 0;
-            Date = "";
-            Email = "";
-            
-        }
-    }
-
-    public class OrderItem
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public double Price { get; set; }
-        public string Image { get; set; }
-        public double Quantity { get; set; }
-
-
-        public OrderItem(string id, string name, double price, string image, double quantity)
-        {
-            Id = id;
-            Name = name;
-            Price = price;
-            Image = image;
-            Quantity = quantity;
-        }
-    
-
-        public OrderItem()
-        {
-            Id = "";
-            Name = "";
-            Price = 0;
-            Image = "";
-            Quantity = 0;
-        }
-    }
-
-    
-    public class OrderWithItems
-    {
-        public Order OrderInfo { get; set; }
-        public List<OrderItem> Items { get; set; }
-        public bool ShowOrderItems { get; set; }
-
-        public OrderWithItems(Order order, List<OrderItem> items)
-        {
-            OrderInfo = order;
-            Items = items;
-            ShowOrderItems = false;
-        }
-
     }
 }

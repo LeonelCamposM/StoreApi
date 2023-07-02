@@ -12,7 +12,7 @@ namespace StorePresentation.Domain
         [Range(0, double.MaxValue, ErrorMessage = "El total debe ser mayor o igual a cero.")]
         public double Total { get; set; }
 
-        [Required(ErrorMessage = "Date is required")]
+        [Required(ErrorMessage = "Fecha es requerida")]
         public string Date { get; set; }
 
         [Required(ErrorMessage = "El email es requerido.")]

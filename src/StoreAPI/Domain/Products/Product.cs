@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 public class Product
 {
     [FirestoreProperty]
-    [Required(ErrorMessage = "Id is required")]
+    // [Required(ErrorMessage = "Id is required")]
     public string Id { get; set; }
 
     [FirestoreProperty]

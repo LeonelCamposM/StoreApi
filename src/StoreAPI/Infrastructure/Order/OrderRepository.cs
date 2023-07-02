@@ -1,15 +1,18 @@
 ﻿using Google.Api.Gax.ResourceNames;
 using Google.Cloud.Firestore;
+using Google.Rpc;
 using Microsoft.AspNetCore.Mvc;
 using StoreAPI.Domain.Order;
 
 public class OrderRepository : IOrderRepository
 {
     private readonly FirestoreDb _firestoreDb;
+    private readonly IProductRepository _productRepository;
 
-    public OrderRepository(FirestoreDb firebaseClient)
+    public OrderRepository(FirestoreDb firebaseClient, IProductRepository productRepository)
     {
         _firestoreDb = firebaseClient;
+        _productRepository = productRepository;
     }
 
     public async Task AddToOrderAsync(Product product, string orderID)
@@ -33,13 +36,20 @@ public class OrderRepository : IOrderRepository
 
     public async Task CheckOut(Order order, string orderID)
     {
-        var userOrder = _firestoreDb.Collection("ProcessedOrders").Document();
-        await userOrder.SetAsync(order);
         List<OrderItem> orderItems = await GetByIdAsync(orderID);
         var orderItemsCollection = _firestoreDb.Collection("Orders").Document(orderID).Collection("items");
+        var userOrder = _firestoreDb.Collection("ProcessedOrders").Document();
+        await userOrder.SetAsync(order);
         foreach (OrderItem item in orderItems)
         {
-            await userOrder.Collection("items").AddAsync(item);
+            Product existingProduct = await _productRepository.GetByidAsync(item.Id);
+            double updatedStock = existingProduct.Stock - item.Quantity;
+            if(updatedStock >= 0)
+            {
+                existingProduct.Stock = updatedStock;
+                await _productRepository.UpdateAsync(existingProduct.Id, existingProduct);
+                await userOrder.Collection("items").AddAsync(item);
+            }
         }
 
         QuerySnapshot existingItemsSnapshot = await orderItemsCollection.GetSnapshotAsync();
@@ -79,18 +89,38 @@ public class OrderRepository : IOrderRepository
     public async Task UpdateAsync(string orderID, List<OrderItem> order)
     {
         var userOrder = _firestoreDb.Collection("Orders").Document(orderID).Collection("items");
-
-        // Delete existing order items
         QuerySnapshot existingItemsSnapshot = await userOrder.GetSnapshotAsync();
-        foreach (DocumentSnapshot documentSnapshot in existingItemsSnapshot.Documents)
+        bool badRequest = await validateOrder(order);
+        if (!badRequest) 
         {
-            await documentSnapshot.Reference.DeleteAsync();
-        }
+            foreach (DocumentSnapshot documentSnapshot in existingItemsSnapshot.Documents)
+            {
+                await documentSnapshot.Reference.DeleteAsync();
+            }
 
-        // Add updated order items
+            foreach (OrderItem item in order)
+            {
+                await userOrder.AddAsync(item);
+            }
+        }
+        else{
+        
+        }
+    }
+
+    public async Task<bool> validateOrder(List<OrderItem> order)
+    {
+        bool badRequest = false;
         foreach (OrderItem item in order)
         {
-            await userOrder.AddAsync(item);
+            Product existingProduct = await _productRepository.GetByidAsync(item.Id);
+            double updatedStock = existingProduct.Stock - item.Quantity;
+            if (updatedStock < 0)
+            {
+                badRequest = true;
+                throw new Exception("No hay suficientes productos para la compra");
+            }
         }
+        return badRequest;
     }
 }

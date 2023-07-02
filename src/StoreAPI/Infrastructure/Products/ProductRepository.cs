@@ -55,22 +55,11 @@ public class ProductRepository : IProductRepository
     public async Task<IEnumerable<Product>> GetAllAsync(string category, string orderBy)
     {
         Query query = _firestoreDb.Collection("Products");
-        //if (category == "" && orderBy != "")
-        //{
-        //    query = _firestoreDb.Collection("Products")
-        //    .OrderBy(orderBy);
-        //}
-        //if (category != "" && orderBy == "")
-        //{
-        //    query = _firestoreDb.Collection("Products")
-        //    .WhereEqualTo("Category", category);
-        //}
-        //if (category != "" && orderBy != "")
-        //{
-        //    query = _firestoreDb.Collection("Products")
-        //    .WhereEqualTo("Category", category)
-        //    .OrderBy(orderBy);
-        //}
+        Console.WriteLine(category);
+        if (!string.IsNullOrEmpty(category) && category != "all")
+        {
+            query = query.WhereEqualTo("Category", category);
+        }
 
         QuerySnapshot snapshot = await query.GetSnapshotAsync();
         List<Product> products = new List<Product>();
@@ -79,6 +68,32 @@ public class ProductRepository : IProductRepository
         {
             Product product = documentSnapshot.ConvertTo<Product>();
             products.Add(product);
+        }
+
+        if (!string.IsNullOrEmpty(orderBy))
+        {
+            products = OrderProducts(products, orderBy);
+        }
+
+        return products;
+    }
+
+    private List<Product> OrderProducts(List<Product> products, string orderBy)
+    {
+        switch (orderBy)
+        {
+            case "Price":
+                products = products.OrderBy(p => p.Price).ToList();
+                break;
+            case "Name":
+                products = products.OrderBy(p => p.Name).ToList();
+                break;
+            case "Description":
+                products = products.OrderBy(p => p.Description).ToList();
+                break;
+            case "Image":
+                products = products.OrderBy(p => p.Image).ToList();
+                break;
         }
 
         return products;
@@ -114,6 +129,9 @@ public class ProductRepository : IProductRepository
         existingProduct.Name = product.Name;
         existingProduct.Description = product.Description;
         existingProduct.Price = product.Price;
+        existingProduct.Stock = product.Stock;
+        existingProduct.Image = product.Image;
+        existingProduct.Category = product.Category;
 
         // Update the product in the Firestore database
         DocumentReference documentRef = _firestoreDb.Collection("Products").Document(id);
