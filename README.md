@@ -6,10 +6,6 @@ The main objective of this project was to learn how to design and implement a we
 - **Backend**: The backend, built with .NET Web API 6.0, handles various operations and integrates with Azure AD B2C for comprehensive user and role management. This ensures secure authentication and authorization for both clients and store owners.
   
 - **Client Side**: On the client side, Blazor WebAssembly offers a rich, interactive user experience. The combination of .NET Web API 6.0 and Blazor WebAssembly provides seamless functionality for the users.
-  
-- **Security**: The security of the API is ensured using JWT and Bearer token-based authentication.
-  
-- **Testing**: Additionally, the API has been thoroughly tested using Postman.
 
 
 ## Key Features
