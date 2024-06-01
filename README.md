@@ -35,6 +35,7 @@ The main objective of this project was to learn how to design and implement a Re
 
 - **Azure AD B2C Integration**: Integrated Azure AD B2C for comprehensive user and role management, allowing seamless authentication and authorization.
 <img src="images/ADB2C.png" alt="Open Api Doc" width="400"/>
+
 - **JWT and Bearer Tokens**: Secured API endpoints using JSON Web Tokens (JWT) and Bearer tokens to ensure that only authenticated users can access the services.
 <img src="images/Bearer.png" alt="Open Api Doc" width="700"/>
 
