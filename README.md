@@ -39,6 +39,10 @@ The main objective of this project was to learn how to design and implement a Re
 - **JWT and Bearer Tokens**: Secured API endpoints using JSON Web Tokens (JWT) and Bearer tokens to ensure that only authenticated users can access the services.
 <img src="images/Bearer.png" alt="Open Api Doc" width="700"/>
 
+
+- **Firebase Document Database**: Firebase is utilized as a document database offering scalability and flexibility for data storage needs.
+<img src="images/Firebase.png" alt="Open Api Doc" width="700"/>
+
 - **Postman Testing**: Conducted extensive testing of the API endpoints using Postman to ensure reliability and performance.
 
 
